@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %> for <%= course.title %></h1>
+  <p><a href="/votes/course/<%= course.id %>">투표 목록으로</a></p>
+
+  <form action="/votes/course/<%= course.id %>" method="post">
+    <div>
+      <label for="title">투표 제목:</label>
+      <input type="text" id="title" name="title" required>
+    </div>
+    <div>
+      <label for="description">설명 (선택):</label>
+      <textarea id="description" name="description" rows="3"></textarea>
+    </div>
+    <div>
+      <label for="closes_at">마감일 (선택):</label>
+      <input type="datetime-local" id="closes_at" name="closes_at">
+    </div>
+    
+    <hr>
+
+    <h3>투표 항목</h3>
+    <div id="options-container">
+      <div><input type="text" name="options[]" placeholder="항목 1" required></div>
+      <div><input type="text" name="options[]" placeholder="항목 2" required></div>
+    </div>
+    <button type="button" id="add-option">항목 추가</button>
+    
+    <hr>
+    <button type="submit">투표 생성하기</button>
+  </form>
+
+  <script>
+    document.getElementById('add-option').addEventListener('click', () => {
+      const container = document.getElementById('options-container');
+      const newOptionDiv = document.createElement('div');
+      const newIndex = container.children.length + 1;
+      newOptionDiv.innerHTML = `<input type="text" name="options[]" placeholder="항목 ${newIndex}"> <button type="button" onclick="this.parentElement.remove()">삭제</button>`;
+      container.appendChild(newOptionDiv);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .result-bar-container { width: 100%; background-color: #f1f1f1; border-radius: 4px; margin: 5px 0; }
+    .result-bar { height: 24px; background-color: #4CAF50; color: white; text-align: center; line-height: 24px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1><%= vote.Course.title %></h1>
+  <h2>투표: <%= title %></h2>
+  <p><%= vote.description %></p>
+  <% if (vote.closes_at) { %>
+    <p><strong>마감일:</strong> <%= new Date(vote.closes_at).toLocaleString() %> (<%= vote.status %>)</p>
+  <% } else { %>
+    <p><strong>상태:</strong> <%= vote.status %></p>
+  <% } %>
+  <p><a href="/votes/course/<%= vote.course_id %>">투표 목록으로</a></p>
+  <hr>
+
+  <% if (user.role === 'STUDENT' && !userResponse && vote.status === 'OPEN') { %>
+    <!-- 학생용 투표 폼 -->
+    <h3>투표하기</h3>
+    <form action="/votes/<%= vote.id %>/respond" method="post">
+      <% vote.VoteOptions.forEach(option => { %>
+        <div>
+          <input type="radio" name="option_id" value="<%= option.id %>" id="opt-<%= option.id %>" required>
+          <label for="opt-<%= option.id %>"><%= option.label %></label>
+        </div>
+      <% }) %>
+      <button type="submit">제출</button>
+    </form>
+  <% } else { %>
+    <!-- 결과 보기 -->
+    <h3>투표 결과 (총 <%= totalResponses %>표)</h3>
+    <% if (userResponse) { %>
+      <p><strong>나의 선택:</strong> <%= vote.VoteOptions.find(opt => opt.id === userResponse.option_id).label %></p>
+    <% } %>
+    
+    <div>
+      <% results.forEach(result => { %>
+        <div>
+          <strong><%= result.label %></strong>: <%= result.count %>표 (<%= totalResponses > 0 ? ((result.count / totalResponses) * 100).toFixed(1) : 0 %>%)
+          <div class="result-bar-container">
+            <div class="result-bar" style="width: <%= totalResponses > 0 ? ((result.count / totalResponses) * 100) : 0 %>%"></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+</body>
+</html>

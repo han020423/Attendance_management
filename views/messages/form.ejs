@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/messages">받은 메시지함으로</a></p>
+
+  <form action="/messages" method="post">
+    <% if (user.role === 'INSTRUCTOR') { %>
+      <p>강의 전체 공지 또는 1대1 메시지를 보낼 수 있습니다.</p>
+      <div>
+        <label for="course_id">강의 전체 공지:</label>
+        <select name="course_id" id="course_id">
+          <option value="">-- 전체 공지로 보내려면 강의 선택 --</option>
+          <% myCourses.forEach(course => { %>
+            <option value="<%= course.id %>"><%= course.title %></option>
+          <% }) %>
+        </select>
+      </div>
+      <p>또는</p>
+      <div>
+        <label for="to_user_id">받는 사람 (1대1 메시지, ID 입력):</label>
+        <input type="number" name="to_user_id" placeholder="사용자 ID">
+      </div>
+    <% } else { %>
+      <!-- 학생용 -->
+      <div>
+        <label for="to_user_id">받는 사람 (교수님):</label>
+        <select name="to_user_id" id="to_user_id" required>
+          <% instructors.forEach(inst => { %>
+            <option value="<%= inst.id %>"><%= inst.name %> 교수님</option>
+          <% }) %>
+        </select>
+      </div>
+    <% } %>
+
+    <hr>
+    <div>
+      <label for="title">제목:</label>
+      <input type="text" id="title" name="title" required>
+    </div>
+    <div>
+      <label for="body">내용:</label>
+      <textarea id="body" name="body" rows="10" required></textarea>
+    </div>
+    <button type="submit">보내기</button>
+  </form>
+
+</body>
+</html>

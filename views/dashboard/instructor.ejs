@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css"> <!-- 공통 스타일시트가 있다고 가정 -->
+  <%
+    const statusMap = {
+      'SCHEDULED': '예정',
+      'OPEN': '진행중',
+      'CLOSED': '종료',
+      'CANCELED': '취소'
+    };
+    const getStatusText = (status) => statusMap[status] || status;
+  %>
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><%= user.name %>님, 환영합니다. (<a href="#" onclick="document.getElementById('logout-form').submit();">로그아웃</a>)</p>
+  <form id="logout-form" action="/auth/logout" method="post" style="display: none;"></form>
+  
+  <nav>
+    <a href="/courses">내 강의 목록</a> |
+    <a href="/excuses?status=PENDING">공결 신청 관리</a> |
+    <a href="/reports/attendance">출석 리포트</a> |
+    <a href="/messages">메시지함</a>
+  </nav>
+
+  <h2>오늘의 수업</h2>
+  <% if (todaySessions.length > 0) { %>
+    <ul>
+      <% todaySessions.forEach(session => { %>
+        <li>
+          <strong><%= session.Course.title %></strong> (<%= session.start_at %> - <%= session.end_at %>) - <strong><%= getStatusText(session.status) %></strong>
+          <% if (session.status === 'SCHEDULED') { %>
+            <form action="/sessions/<%= session.id %>/open" method="post" style="display: inline;">
+              <button type="submit">출석 오픈</button>
+            </form>
+          <% } else if (session.status === 'OPEN') { %>
+            <form action="/sessions/<%= session.id %>/close" method="post" style="display: inline;">
+              <button type="submit">출석 마감</button>
+            </form>
+            <a href="/sessions/<%= session.id %>/attendance/summary">실시간 현황</a>
+            <p>인증번호: <strong><%= session.pin_code %></strong></p>
+          <% } else { %>
+            <span>(<%= getStatusText(session.status) %>)</span>
+            <a href="/sessions/<%= session.id %>/attendance/summary">결과 보기</a>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <p>오늘 예정된 수업이 없습니다.</p>
+  <% } %>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <nav>
+    <a href="/admin/users">사용자 관리</a> |
+    <a href="/admin/semesters">학기 관리</a> |
+    <a href="/admin/departments">학과 관리</a> |
+    <a href="/admin/courses">과목 관리</a>
+  </nav>
+  <hr>
+
+  <h2>새 학과 생성</h2>
+  <form action="/admin/departments" method="post">
+    <input type="text" name="name" placeholder="학과 이름" required>
+    <button type="submit">생성</button>
+  </form>
+  <hr>
+
+  <h2>학과 목록</h2>
+  <ul>
+    <% departments.forEach(department => { %>
+      <li>
+        <%= department.name %>
+        <form action="/admin/departments/<%= department.id %>/delete" method="post" style="display: inline;">
+          <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

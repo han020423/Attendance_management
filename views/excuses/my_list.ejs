@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p>
+    <a href="/me/dashboard">대시보드로 돌아가기</a> | 
+    <a href="/courses">새 공결 신청하기</a>
+  </p>
+
+  <% if (excuses.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>과목</th>
+          <th>주차</th>
+          <th>신청일</th>
+          <th>상태</th>
+          <th>상세보기</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% excuses.forEach(excuse => { %>
+          <tr>
+            <td><%= excuse.ClassSession.Course.title %></td>
+            <td><%= excuse.ClassSession.week %></td>
+            <td><%= new Date(excuse.createdAt).toLocaleDateString() %></td>
+            <td>
+              <% if (excuse.status === 'PENDING') { %>
+                대기중
+              <% } else if (excuse.status === 'APPROVED') { %>
+                승인
+              <% } else if (excuse.status === 'REJECTED') { %>
+                반려
+              <% } %>
+            </td>
+            <td><a href="/excuses/<%= excuse.id %>">보기</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p>공결 신청 내역이 없습니다.</p>
+  <% } %>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/me/dashboard">대시보드로 돌아가기</a></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>강의명</th>
+        <th>주차</th>
+        <th>학생명</th>
+        <th>신청 내용</th>
+        <th>상태</th>
+        <th>관리</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% appeals.forEach(appeal => { %>
+        <tr>
+          <td><%= appeal.Attendance.ClassSession.Course.title %></td>
+          <td><%= appeal.Attendance.ClassSession.week %></td>
+          <td><%= appeal.Student ? appeal.Student.name : 'N/A' %></td>
+          <td><%= appeal.message.substring(0, 30) %>...</td>
+          <td><%= appeal.status %></td>
+          <td>
+            <a href="/appeals/<%= appeal.id %>">상세보기</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

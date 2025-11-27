@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= message.title %></h1>
+  <p><a href="/messages">받은 메시지함으로</a></p>
+
+  <div>
+    <p><strong>보낸 사람:</strong> <%= message.FromUser ? message.FromUser.name : 'N/A' %> (<%= message.FromUser ? message.FromUser.email : 'N/A' %>)</p>
+    <p><strong>받은 시간:</strong> <%= new Date(message.createdAt).toLocaleString() %></p>
+    <% if (message.Course) { %>
+      <p><strong>관련 강의:</strong> <%= message.Course.title %></p>
+    <% } %>
+  </div>
+  <hr>
+  <div>
+    <pre><%= message.body %></pre>
+  </div>
+
+  <hr>
+  <a href="/messages/new?toUserId=<%= message.from_user_id %>">답장하기</a>
+
+</body>
+</html>

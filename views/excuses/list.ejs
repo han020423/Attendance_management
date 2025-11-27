@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/me/dashboard">대시보드로 돌아가기</a></p>
+
+  <div>
+    <a href="/excuses?status=PENDING">대기중</a> |
+    <a href="/excuses?status=APPROVED">승인됨</a> |
+    <a href="/excuses?status=REJECTED">반려됨</a> |
+    <a href="/excuses">전체보기</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>강의명</th>
+        <th>주차</th>
+        <th>학생명</th>
+        <th>상태</th>
+        <th>신청일</th>
+        <th>상세</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% excuses.forEach(excuse => { %>
+        <tr>
+          <td><%= excuse.ClassSession.Course.title %></td>
+          <td><%= excuse.ClassSession.week %></td>
+          <td><%= excuse.Student ? excuse.Student.name : 'N/A' %></td>
+          <td><%= excuse.status %></td>
+          <td><%= new Date(excuse.createdAt).toLocaleDateString() %></td>
+          <td><a href="/excuses/<%= excuse.id %>">보기</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

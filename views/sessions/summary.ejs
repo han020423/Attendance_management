@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/me/dashboard">대시보드로 돌아가기</a></p>
+
+  <h2>요약</h2>
+  <p>
+    출석: <%= summary.present %> |
+    지각: <%= summary.late %> |
+    결석: <%= summary.absent %> |
+    공결: <%= summary.approved_absence %>
+  </p>
+
+  <h2>상세 목록</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>상태</th>
+        <th>출석 시간</th>
+        <th>관리</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% attendances.forEach(att => { %>
+        <tr>
+          <td><%= att.Student ? att.Student.name : 'N/A' %></td>
+          <td>
+            <% if (att.status === 1) { %> 출석
+            <% } else if (att.status === 2) { %> 지각
+            <% } else if (att.status === 3) { %> 결석
+            <% } else if (att.status === 4) { %> 공결
+            <% } else { %> 미정 <% } %>
+          </td>
+          <td><%= att.checked_at ? new Date(att.checked_at).toLocaleTimeString() : '-' %></td>
+          <td>
+            <form action="/sessions/<%= session.id %>/attendance/<%= att.id %>/update" method="post" style="display: inline;">
+              <select name="status">
+                <option value="1" <%= att.status === 1 ? 'selected' : '' %>>출석</option>
+                <option value="2" <%= att.status === 2 ? 'selected' : '' %>>지각</option>
+                <option value="3" <%= att.status === 3 ? 'selected' : '' %>>결석</option>
+                <option value="4" <%= att.status === 4 ? 'selected' : '' %>>공결</option>
+              </select>
+              <input type="text" name="reason" placeholder="변경 사유 (선택 사항)" style="width: 150px;">
+              <button type="submit">변경</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

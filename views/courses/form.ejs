@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <form action="/courses" method="post">
+    <div>
+      <label for="semester_id">학기:</label>
+      <select name="semester_id" id="semester_id" required>
+        <% semesters.forEach(s => { %>
+          <option value="<%= s.id %>"><%= s.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label for="title">강의명:</label>
+      <input type="text" id="title" name="title" required>
+    </div>
+    <div>
+      <label for="code">학수번호:</label>
+      <input type="text" id="code" name="code" required>
+    </div>
+    <div>
+      <label for="section">분반:</label>
+      <input type="text" id="section" name="section" required>
+    </div>
+    <div>
+      <label for="department">개설학과:</label>
+      <input type="text" id="department" name="department">
+    </div>
+    <button type="submit">생성하기</button>
+  </form>
+</body>
+</html>

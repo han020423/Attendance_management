@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/excuses">목록으로</a></p>
+
+  <div>
+    <p><strong>학생:</strong> <%= excuse.Student ? excuse.Student.name : 'N/A' %> (<%= excuse.Student ? excuse.Student.email : 'N/A' %>)</p>
+    <p><strong>강의:</strong> <%= excuse.ClassSession.Course.title %> - <%= excuse.ClassSession.week %>주차</p>
+    <p><strong>신청일:</strong> <%= new Date(excuse.createdAt).toLocaleString() %></p>
+    <p><strong>상태:</strong> <%= excuse.status %></p>
+    <p><strong>사유:</strong> <pre><%= excuse.reason_text %></pre></p>
+    
+    <% if (excuse.ExcuseFiles.length > 0) { %>
+      <p><strong>첨부파일:</strong>
+        <% excuse.ExcuseFiles.forEach(file => { %>
+          <a href="/files/<%= file.id %>" download><%= file.original_name %></a>
+        <% }) %>
+      </p>
+    <% } %>
+  </div>
+
+  <hr>
+
+  <% if (user.role !== 'STUDENT' && excuse.status === 'PENDING') { %>
+    <h2>처리</h2>
+    <form id="process-form" method="post">
+      <div>
+        <label for="review_comment">코멘트:</label>
+        <textarea name="review_comment" id="review_comment" rows="3"></textarea>
+      </div>
+      <input type="hidden" name="_method" value="PATCH">
+      <button type="button" onclick="submitApproval('APPROVED')">승인</button>
+      <button type="button" onclick="submitApproval('REJECTED')">반려</button>
+    </form>
+
+    <script>
+      function submitApproval(status) {
+        const form = document.getElementById('process-form');
+        form.action = `/excuses/<%= excuse.id %>?_method=PATCH`;
+        
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        form.appendChild(statusInput);
+        
+        form.submit();
+      }
+    </script>
+  <% } else if (excuse.status !== 'PENDING') { %>
+    <h2>처리 결과</h2>
+    <p><strong>처리자:</strong> <%= excuse.Reviewer ? excuse.Reviewer.name : 'N/A' %></p>
+    <p><strong>처리일:</strong> <%= new Date(excuse.updatedAt).toLocaleString() %></p>
+    <p><strong>코멘트:</strong> <pre><%= excuse.review_comment %></pre></p>
+  <% } %>
+
+</body>
+</html>

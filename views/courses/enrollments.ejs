@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= course.title %> - <%= title %></h1>
+  <p><a href="/courses/<%= course.id %>">강의 상세로 돌아가기</a></p>
+
+  <h2>수강생 추가</h2>
+  <form action="/courses/<%= course.id %>/enrollments" method="post">
+    <div>
+      <label for="student_email">학생 이메일:</label>
+      <input type="email" id="student_email" name="student_email" placeholder="student@example.com" required>
+    </div>
+    <button type="submit">추가하기</button>
+    <% if (error) { %>
+      <p style="color: red;"><%= error %></p>
+    <% } %>
+  </form>
+
+  <hr>
+
+  <h2>현재 수강생 목록 (<%= enrollments.length %>명)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>이메일</th>
+        <th>관리</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% enrollments.forEach(enrollment => { %>
+        <tr>
+          <td><%= enrollment.User ? enrollment.User.name : 'N/A' %></td>
+          <td><%= enrollment.User.email %></td>
+          <td>
+            <form action="/courses/<%= course.id %>/enrollments/<%= enrollment.id %>/delete" method="post" onsubmit="return confirm('정말로 이 학생을 수강 명단에서 제외하시겠습니까?');">
+              <button type="submit">삭제</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+</body>
+</html>

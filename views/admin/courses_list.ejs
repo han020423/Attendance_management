@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <nav>
+    <a href="/admin/users">사용자 관리</a> |
+    <a href="/admin/semesters">학기 관리</a> |
+    <a href="/admin/departments">학과 관리</a> |
+    <a href="/admin/courses">과목 관리</a>
+  </nav>
+  <hr>
+
+  <p><a href="/admin/courses/new">새 과목 생성</a></p>
+
+  <h2>과목 목록</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>제목</th>
+        <th>학수번호-분반</th>
+        <th>담당교수</th>
+        <th>학기</th>
+        <th>학과</th>
+        <th>관리</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% courses.forEach(course => { %>
+        <tr>
+          <td><%= course.title %></td>
+          <td><%= course.code %>-<%= course.section %></td>
+          <td><%= course.Instructor ? course.Instructor.name : '미지정' %></td>
+          <td><%= course.Semester ? course.Semester.name : '미지정' %></td>
+          <td><%= course.Department ? course.Department.name : '미지정' %></td>
+          <td>
+            <a href="/admin/courses/<%= course.id %>/edit">수정</a>
+            <form action="/admin/courses/<%= course.id %>/delete" method="post" style="display: inline;">
+              <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

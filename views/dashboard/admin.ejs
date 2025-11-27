@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p>관리자(<%= user.name %>)님, 환영합니다. (<a href="#" onclick="document.getElementById('logout-form').submit();">로그아웃</a>)</p>
+  <form id="logout-form" action="/auth/logout" method="post" style="display: none;"></form>
+
+  <nav>
+    <a href="/audits">감사 로그</a> |
+    <a href="/courses">전체 강의 목록</a>
+    <!-- 추가적인 관리자 메뉴 -->
+  </nav>
+
+  <h2>시스템 관리</h2>
+  <ul>
+    <li><a href="/admin/users">사용자 관리</a></li>
+    <li><a href="/admin/semesters">학기 관리</a></li>
+    <li><a href="/admin/departments">학과 관리</a></li>
+    <li><a href="/admin/courses">과목 관리</a></li>
+    <li><a href="/audits">감사 로그 보기</a></li>
+  </ul>
+</body>
+</html>

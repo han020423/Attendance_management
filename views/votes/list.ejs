@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/courses/<%= course.id %>">강의 상세로 돌아가기</a></p>
+
+  <% if (user.role === 'INSTRUCTOR') { %>
+    <a href="/votes/new/course/<%= course.id %>">새 투표 생성</a>
+  <% } %>
+
+  <h2>투표 목록</h2>
+  <ul>
+    <% votes.forEach(vote => { %>
+      <li>
+        <a href="/votes/<%= vote.id %>"><%= vote.title %></a>
+        (상태: <%= vote.status %>)
+        <small>
+          - 생성: <%= new Date(vote.createdAt).toLocaleDateString() %>
+          <% if (vote.closes_at) { %>
+            | 마감: <%= new Date(vote.closes_at).toLocaleString() %>
+          <% } %>
+        </small>
+      </li>
+    <% }) %>
+  </ul>
+
+</body>
+</html>

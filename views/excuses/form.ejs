@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= session.Course.title %> - <%= session.week %>주차 공결 신청</h1>
+  <p><a href="/me/dashboard">대시보드로 돌아가기</a></p>
+
+  <form action="/excuses/session/<%= session.id %>" method="post" enctype="multipart/form-data">
+    <div>
+      <label for="reason_code">사유 구분:</label>
+      <select name="reason_code" id="reason_code">
+        <option value="SICKNESS">병결</option>
+        <option value="FAMILY_EVENT">경조사</option>
+        <option value="ETC">기타</option>
+      </select>
+    </div>
+    <div>
+      <label for="reason_text">상세 사유:</label>
+      <textarea id="reason_text" name="reason_text" rows="5" required></textarea>
+    </div>
+    <div>
+      <label for="excuseFile">증빙 파일:</label>
+      <input type="file" id="excuseFile" name="excuseFile">
+    </div>
+    <button type="submit">제출하기</button>
+  </form>
+</body>
+</html>

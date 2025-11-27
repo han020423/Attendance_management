@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/me/dashboard">대시보드로 돌아가기</a></p>
+
+  <ul>
+    <% notifications.forEach(notif => { %>
+      <li style="<%= notif.is_read ? 'color: gray;' : 'font-weight: bold;' %>">
+        <p><%= notif.message %></p>
+        <small><%= new Date(notif.createdAt).toLocaleString() %></small>
+        <% if (notif.link) { %>
+          <a href="<%= notif.link %>">확인하기</a>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

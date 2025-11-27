@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= title %></h1>
+  <p><a href="/admin/courses">과목 목록으로</a></p>
+
+  <form action="<%= course ? '/admin/courses/' + course.id : '/admin/courses' %>" method="post">
+    <div>
+      <label for="title">과목명:</label>
+      <input type="text" id="title" name="title" value="<%= course ? course.title : '' %>" required>
+    </div>
+    <div>
+      <label for="code">학수번호:</label>
+      <input type="text" id="code" name="code" value="<%= course ? course.code : '' %>" required>
+    </div>
+    <div>
+      <label for="section">분반:</label>
+      <input type="text" id="section" name="section" value="<%= course ? course.section : '' %>" required>
+    </div>
+    <div>
+      <label for="instructor_id">담당교수:</label>
+      <select id="instructor_id" name="instructor_id" required>
+        <% instructors.forEach(instructor => { %>
+          <option value="<%= instructor.id %>" <%= (course && course.instructor_id == instructor.id) ? 'selected' : '' %>>
+            <%= instructor.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label for="semester_id">학기:</label>
+      <select id="semester_id" name="semester_id" required>
+        <% semesters.forEach(semester => { %>
+          <option value="<%= semester.id %>" <%= (course && course.semester_id == semester.id) ? 'selected' : '' %>>
+            <%= semester.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label for="department_id">학과:</label>
+      <select id="department_id" name="department_id" required>
+        <% departments.forEach(department => { %>
+          <option value="<%= department.id %>" <%= (course && course.department_id == department.id) ? 'selected' : '' %>>
+            <%= department.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+    <button type="submit"><%= course ? '수정하기' : '생성하기' %></button>
+  </form>
+</body>
+</html>

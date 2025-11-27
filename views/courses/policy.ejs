@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1><%= course.title %> - 출석 정책 관리</h1>
+  <p><a href="/courses/<%= course.id %>">강의 상세로 돌아가기</a></p>
+
+  <form action="/courses/<%= course.id %>/policy" method="post">
+    <div>
+      <label for="lates_for_absence">결석 1회로 처리될 지각 횟수:</label>
+      <input type="number" id="lates_for_absence" name="lates_for_absence" value="<%= policy.lates_for_absence %>" required>
+    </div>
+    <div>
+      <label for="absence_penalty_points">결석 1회당 감점:</label>
+      <input type="number" step="0.1" id="absence_penalty_points" name="absence_penalty_points" value="<%= policy.absence_penalty_points %>" required>
+    </div>
+    <div>
+      <label for="late_penalty_points">지각 1회당 감점 (결석으로 전환되고 남은 지각):</label>
+      <input type="number" step="0.1" id="late_penalty_points" name="late_penalty_points" value="<%= policy.late_penalty_points %>" required>
+    </div>
+    <button type="submit">정책 저장</button>
+  </form>
+
+</body>
+</html>
