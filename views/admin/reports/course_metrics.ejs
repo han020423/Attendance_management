@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <h1><%= title %></h1>
+    <p><a href="/admin">관리자 메뉴로 돌아가기</a></p>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">과목 선택</h5>
+        <div class="input-group">
+          <select class="form-select" id="course-select">
+            <option value="">리포트를 볼 과목을 선택하세요</option>
+            <% courses.forEach(course => { %>
+              <option value="<%= course.id %>" <%= selectedCourseId == course.id ? 'selected' : '' %>>
+                <%= course.title %> (<%= course.Instructor.name %>)
+              </option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <% if (selectedCourseId && metrics.courseName) { %>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3>'<%= metrics.courseName %>' 리포트</h3>
+          <button class="btn btn-outline-secondary btn-sm" onclick="window.print();">문서화 (인쇄)</button>
+        </div>
+        <div class="card-body">
+          <p><strong>총 수강 인원:</strong> <%= metrics.totalEnrolled %>명</p>
+          <p><strong>과목 전체 출석률:</strong> <%= metrics.overallAttendanceRate %>%</p>
+          <p><strong>공결 신청 수 / 승인율:</strong> <%= metrics.totalExcuses %>건 / <%= metrics.excuseApprovalRate %>%</p>
+          
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <h4>누적 결석 상위 학생</h4>
+              <ul class="list-group">
+                <% metrics.topAbsentees.forEach(s => { %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <%= s.name %>
+                    <span class="badge bg-danger rounded-pill"><%= s.absent %>회</span>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h4>누적 지각 상위 학생</h4>
+              <ul class="list-group">
+                <% metrics.topLates.forEach(s => { %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <%= s.name %>
+                    <span class="badge bg-warning text-dark rounded-pill"><%= s.late %>회</span>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+
+          <h4 class="mt-5">주차별 출석 현황</h4>
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>주차</th>
+                <th>날짜</th>
+                <th>출석률</th>
+                <th>출석</th>
+                <th>지각</th>
+                <th>공결</th>
+                <th>결석</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% metrics.weekly.forEach(week => { %>
+                <tr>
+                  <td><%= week.week %>주차</td>
+                  <td><%= new Date(week.date).toLocaleDateString() %></td>
+                  <td>
+                    <div class="progress">
+                      <div class="progress-bar bg-success" role="progressbar" style="width: <%= week.attendanceRate %>%;" aria-valuenow="<%= week.attendanceRate %>" aria-valuemin="0" aria-valuemax="100">
+                        <%= week.attendanceRate %>%
+                      </div>
+                    </div>
+                  </td>
+                  <td><%= week.present %></td>
+                  <td><%= week.late %></td>
+                  <td><%= week.approved %></td>
+                  <td><%= week.absent %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info" role="alert">
+        과목을 선택하면 상세 리포트가 표시됩니다.
+      </div>
+    <% } %>
+  </div>
+
+  <script>
+    document.getElementById('course-select').addEventListener('change', function() {
+      const courseId = this.value;
+      if (courseId) {
+        window.location.href = `/admin/reports/course-metrics/${courseId}`;
+      } else {
+        window.location.href = '/admin/reports/course-metrics';
+      }
+    });
+  </script>
+</body>
+</html>

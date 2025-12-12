@@ -1,5 +1,5 @@
 // controllers/courseController.js
-const { Course, ClassSession, Enrollment, User, Semester, CoursePolicy, Attendance, sequelize } = require('../models');
+const { Course, ClassSession, Enrollment, User, Semester, CoursePolicy, Attendance, sequelize, AuditLog } = require('../models');
 const { Op } = require('sequelize');
 
 // GET /courses - 자신의 강의 목록
@@ -172,16 +172,47 @@ exports.renderPolicyForm = async (req, res, next) => {
 // POST /courses/:id/policy - 정책 업데이트
 exports.updatePolicy = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const { late_penalty_points, absence_penalty_points, lates_for_absence } = req.body;
-        await CoursePolicy.update({
-            late_penalty_points,
-            absence_penalty_points,
-            lates_for_absence,
-        }, {
-            where: { course_id: id }
+        const { id: courseId } = req.params;
+        const instructorId = req.session.user.id;
+
+        // 1. Find the policy and verify ownership via the course
+        const policy = await CoursePolicy.findOne({
+            where: { course_id: courseId },
+            include: { model: Course, attributes: ['instructor_id'] }
         });
-        res.redirect(`/courses/${id}/policy`);
+
+        if (!policy || policy.Course.instructor_id !== instructorId) {
+            return res.status(403).send('권한이 없습니다.');
+        }
+
+        // 2. Store old data
+        const oldData = {
+            late_penalty_points: policy.late_penalty_points,
+            absence_penalty_points: policy.absence_penalty_points,
+            lates_for_absence: policy.lates_for_absence,
+        };
+
+        // 3. Get new data and update the policy object
+        const { late_penalty_points, absence_penalty_points, lates_for_absence } = req.body;
+        policy.late_penalty_points = late_penalty_points;
+        policy.absence_penalty_points = absence_penalty_points;
+        policy.lates_for_absence = lates_for_absence;
+        await policy.save();
+
+        // 4. Create audit log
+        await AuditLog.create({
+            actor_id: instructorId,
+            action: 'ATTENDANCE_POLICY_UPDATE',
+            target_type: 'CoursePolicy',
+            target_id: policy.id,
+            meta_json: JSON.stringify({
+                course_id: courseId,
+                old_data: oldData,
+                new_data: { late_penalty_points, absence_penalty_points, lates_for_absence }
+            }),
+        });
+
+        res.redirect(`/courses/${courseId}/policy`);
     } catch (error) {
         console.error(error);
         next(error);

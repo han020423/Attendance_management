@@ -23,6 +23,7 @@ const notificationRouter = require('./routes/notifications');
 const voteRouter = require('./routes/votes');
 const messageRouter = require('./routes/messages');
 const adminRouter = require('./routes/admin');
+const adminReportsRouter = require('./routes/adminReports');
 
 
 const app = express();
@@ -88,6 +89,7 @@ app.use('/me/notifications', notificationRouter);
 app.use('/votes', voteRouter);
 app.use('/messages', messageRouter);
 app.use('/admin', adminRouter);
+app.use('/admin/reports', adminReportsRouter);
 
 
 // 404 처리 미들웨어

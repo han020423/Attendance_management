@@ -161,7 +161,7 @@ exports.updateExcuseStatus = async (req, res, next) => {
     }, { transaction: t });
 
     await AuditLog.create({
-      user_id: reviewer_id,
+      actor_id: reviewer_id,
       action: `EXCUSE_REQUEST_${status}`,
       target_type: 'ExcuseRequest',
       target_id: id,

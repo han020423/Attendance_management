@@ -34,6 +34,14 @@ exports.openAttendance = async (req, res, next) => {
     }));
     await Attendance.bulkCreate(attendances, { ignoreDuplicates: true });
 
+    // 감사 로그 기록
+    await AuditLog.create({
+      actor_id: req.session.user.id,
+      action: 'ATTENDANCE_OPEN',
+      target_type: 'ClassSession',
+      target_id: session.id,
+      meta_json: JSON.stringify({ course_id: session.course_id }),
+    });
 
     res.redirect('/me/dashboard');
   } catch (error) {
@@ -52,6 +60,16 @@ exports.closeAttendance = async (req, res, next) => {
     session.status = 'CLOSED';
     session.pin_code = null; // PIN 초기화
     await session.save();
+
+    // 감사 로그 기록
+    await AuditLog.create({
+      actor_id: req.session.user.id,
+      action: 'ATTENDANCE_CLOSE',
+      target_type: 'ClassSession',
+      target_id: session.id,
+      meta_json: JSON.stringify({ course_id: session.course_id }),
+    });
+    
     res.redirect('/me/dashboard');
   } catch (error) {
     console.error(error);
@@ -90,6 +108,20 @@ exports.handleAttendance = async (req, res, next) => {
         attendance.checked_at = now;
         attendance.method_used = method;
         await attendance.save();
+
+        // 감사 로그 기록 (학생 출석)
+        await AuditLog.create({
+          actor_id: studentId,
+          action: 'STUDENT_ATTENDANCE_CHECKIN',
+          target_type: 'Attendance',
+          target_id: attendance.id,
+          meta_json: JSON.stringify({
+            method_used: method,
+            session_id: sessionId,
+            newStatus: attendance.status
+          }),
+        });
+        
         return res.redirect('/me/dashboard');
       }
     }
@@ -185,7 +217,7 @@ exports.updateAttendanceStatus = async (req, res, next) => {
 
     // 감사 로그 기록
     await AuditLog.create({
-      user_id: instructorId,
+      actor_id: instructorId,
       action: 'UPDATE_ATTENDANCE_STATUS',
       target_type: 'Attendance',
       target_id: attendanceId,
@@ -229,7 +261,7 @@ exports.upsertAttendance = async (req, res, next) => {
 
     // 3. 감사 로그를 기록합니다.
     await AuditLog.create({
-      user_id: instructorId,
+      actor_id: instructorId,
       action: created ? 'CREATE_ATTENDANCE_STATUS' : 'UPDATE_ATTENDANCE_STATUS',
       target_type: 'Attendance',
       target_id: attendance.id,
@@ -327,8 +359,26 @@ exports.updateSession = async (req, res, next) => {
       return res.status(403).send('권한이 없습니다.');
     }
 
+    const oldData = {
+      date: session.date,
+      start_at: session.start_at,
+      end_at: session.end_at,
+    };
     const { date, start_at, end_at } = req.body;
+
     await session.update({ date, start_at, end_at });
+
+    // 감사 로그 기록
+    await AuditLog.create({
+      actor_id: req.session.user.id,
+      action: 'SESSION_TIME_UPDATE',
+      target_type: 'ClassSession',
+      target_id: session.id,
+      meta_json: JSON.stringify({
+        old_data: oldData,
+        new_data: { date, start_at, end_at }
+      }),
+    });
 
     res.redirect(`/courses/${session.course_id}`);
   } catch (error) {
