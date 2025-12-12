@@ -24,9 +24,26 @@ const voteRouter = require('./routes/votes');
 const messageRouter = require('./routes/messages');
 const adminRouter = require('./routes/admin');
 const adminReportsRouter = require('./routes/adminReports');
+const sseRouter = require('./routes/sse'); // SSE 라우터 추가
 
 
 const app = express();
+
+// SSE 클라이언트 관리용 Map
+const sseClients = new Map();
+app.set('sseClients', sseClients);
+
+// SSE 알림 발송 헬퍼 함수
+app.set('sendSseNotification', (userId, notification) => {
+  // userId를 문자열로 변환하여 클라이언트를 조회합니다.
+  const client = sseClients.get(String(userId));
+  if (client) {
+    client.write(`data: ${JSON.stringify(notification)}
+
+`);
+  }
+});
+
 
 // Sequelize 연결
 sequelize.sync({ alter: true }) // alter: true로 하면 모델 변경 시 DB에 반영
@@ -90,6 +107,7 @@ app.use('/votes', voteRouter);
 app.use('/messages', messageRouter);
 app.use('/admin', adminRouter);
 app.use('/admin/reports', adminReportsRouter);
+app.use('/sse', sseRouter); // SSE 라우터 연결
 
 
 // 404 처리 미들웨어

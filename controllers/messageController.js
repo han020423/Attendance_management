@@ -50,6 +50,7 @@ exports.createMessage = async (req, res, next) => {
   try {
     const { to_user_id, course_id, title, body } = req.body;
     const from_user_id = req.session.user.id;
+    const sendSse = req.app.get('sendSseNotification');
 
     // Case 1: 교원이 특정 강의 수강생 전체에게 공지
     if (req.session.user.role === 'INSTRUCTOR' && course_id) {
@@ -72,6 +73,11 @@ exports.createMessage = async (req, res, next) => {
       }));
       await Notification.bulkCreate(notifications, { transaction: t });
 
+      // SSE로 알림 발송
+      notifications.forEach(notification => {
+        sendSse(notification.user_id, notification);
+      });
+
     } else { // Case 2: 1대1 메시지
       await Message.create({
         from_user_id,
@@ -80,12 +86,15 @@ exports.createMessage = async (req, res, next) => {
         body,
       }, { transaction: t });
 
-      await Notification.create({
+      const newNotification = await Notification.create({
         user_id: to_user_id,
         type: 'NEW_MESSAGE',
         message: `${req.session.user.name}님으로부터 새로운 메시지가 도착했습니다.`,
         link: `/messages`
       }, { transaction: t });
+
+      // SSE로 알림 발송
+      sendSse(to_user_id, newNotification);
     }
 
     await t.commit();

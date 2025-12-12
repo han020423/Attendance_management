@@ -65,5 +65,49 @@
   <% } else { %>
     <p>오늘 수업이 없습니다.</p>
   <% } %>
+
+<script>
+  // 푸시 알림을 표시할 컨테이너 생성
+  let notificationContainer = document.getElementById('push-notification-container');
+  if (!notificationContainer) {
+    notificationContainer = document.createElement('div');
+    notificationContainer.id = 'push-notification-container';
+    document.body.appendChild(notificationContainer);
+  }
+
+  // 푸시 알림 표시 함수
+  function showPushNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'push-notification';
+    notification.textContent = message;
+    notificationContainer.appendChild(notification);
+
+    // 애니메이션이 끝난 후(5초) DOM에서 요소 제거
+    setTimeout(() => {
+      notification.remove();
+    }, 5000);
+  }
+
+  // 학생일 경우에만 SSE 연결
+  <% if (user && user.role === 'STUDENT') { %>
+    const eventSource = new EventSource('/sse/connect');
+
+    eventSource.onmessage = function(event) {
+      try {
+        const notification = JSON.parse(event.data);
+        if (notification && notification.message) {
+          showPushNotification(notification.message);
+        }
+      } catch (e) {
+        console.error('Error parsing notification data:', e);
+      }
+    };
+
+    eventSource.onerror = function(err) {
+      console.error("EventSource failed:", err);
+      // 브라우저가 자동으로 재연결을 시도하므로, 여기서는 에러 로깅만 합니다.
+    };
+  <% } %>
+</script>
 </body>
 </html>

@@ -36,6 +36,7 @@ exports.createVote = async (req, res, next) => {
   try {
     const { courseId } = req.params;
     const { title, description, options, closes_at } = req.body; // options는 배열
+    const sendSse = req.app.get('sendSseNotification');
 
     const vote = await Vote.create({
       course_id: courseId,
@@ -64,6 +65,11 @@ exports.createVote = async (req, res, next) => {
       link: `/votes/${vote.id}`,
     }));
     await Notification.bulkCreate(notifications, { transaction: t });
+
+    // SSE로 알림 발송
+    notifications.forEach(notification => {
+      sendSse(notification.user_id, notification);
+    });
 
     await t.commit();
     res.redirect(`/votes/course/${courseId}`);

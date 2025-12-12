@@ -26,6 +26,12 @@ exports.openAttendance = async (req, res, next) => {
     }));
     await Notification.bulkCreate(notifications);
 
+    // SSE로 알림 발송
+    const sendSse = req.app.get('sendSseNotification');
+    notifications.forEach(notification => {
+      sendSse(notification.user_id, notification);
+    });
+
     // 출석 레코드 생성 (기본값: 결석)
     const attendances = enrollments.map(e => ({
         session_id: session.id,
@@ -53,13 +59,63 @@ exports.openAttendance = async (req, res, next) => {
 // POST /sessions/:id/close - 출석 마감
 exports.closeAttendance = async (req, res, next) => {
   try {
-    const session = await ClassSession.findByPk(req.params.id);
+    const session = await ClassSession.findByPk(req.params.id, { include: [Course] });
     if (!session) {
       return res.status(404).send('수업을 찾을 수 없습니다.');
     }
     session.status = 'CLOSED';
     session.pin_code = null; // PIN 초기화
     await session.save();
+
+    // --- 자동 결석자 경고 알림 로직 추가 ---
+    // 1. 이 세션에 결석한 학생들을 찾습니다.
+    const absentAttendances = await Attendance.findAll({
+      where: {
+        session_id: session.id,
+        status: 3 // 결석
+      }
+    });
+
+    const sendSse = req.app.get('sendSseNotification');
+
+    // 2. 각 결석 학생에 대해 총 결석 횟수를 확인하고 알림을 보냅니다.
+    for (const attendance of absentAttendances) {
+      const studentId = attendance.student_id;
+      const courseId = session.course_id;
+      const courseTitle = session.Course.title;
+
+      // 해당 과목의 총 결석 횟수 계산
+      const absenceCount = await Attendance.count({
+        where: {
+          student_id: studentId,
+          status: 3 // 결석
+        },
+        include: [{
+          model: ClassSession,
+          where: { course_id: courseId },
+          attributes: []
+        }]
+      });
+
+      let notificationMessage = null;
+      if (absenceCount === 2) {
+        notificationMessage = `[${courseTitle}] 강의에 2회 결석하여 경고 알림이 발송되었습니다. 출결 관리에 유의해 주시기 바랍니다.`;
+      } else if (absenceCount === 3) {
+        notificationMessage = `[${courseTitle}] 강의에 3회 결석하여 위험 알림이 발송되었습니다. 학점 이수에 문제가 발생할 수 있으니 즉시 확인해 주시기 바랍니다.`;
+      }
+
+      if (notificationMessage) {
+        const newNotification = await Notification.create({
+          user_id: studentId,
+          type: 'ABSENCE_WARNING',
+          message: notificationMessage,
+          link: `/courses/${courseId}/score`
+        });
+        // SSE로 알림 발송
+        sendSse(studentId, newNotification);
+      }
+    }
+    // --- 로직 추가 끝 ---
 
     // 감사 로그 기록
     await AuditLog.create({
@@ -205,7 +261,13 @@ exports.updateAttendanceStatus = async (req, res, next) => {
     const { status: newStatus, reason } = req.body;
     const instructorId = req.session.user.id;
 
-    const attendance = await Attendance.findByPk(attendanceId);
+    const attendance = await Attendance.findByPk(attendanceId, {
+      // 알림에 필요한 course 정보를 위해 include 추가
+      include: [{
+        model: ClassSession,
+        include: [Course]
+      }]
+    });
 
     if (!attendance) {
       return res.status(404).send('출석 기록을 찾을 수 없습니다.');
@@ -214,6 +276,45 @@ exports.updateAttendanceStatus = async (req, res, next) => {
     const oldStatus = attendance.status;
     attendance.status = parseInt(newStatus, 10);
     await attendance.save();
+
+    // --- 결석 처리 시 경고 알림 로직 추가 ---
+    if (parseInt(newStatus, 10) === 3) { // '결석'으로 처리된 경우
+      const studentId = attendance.student_id;
+      const courseId = attendance.ClassSession.course_id;
+      const courseTitle = attendance.ClassSession.Course.title;
+
+      // 해당 과목의 총 결석 횟수 계산
+      const absenceCount = await Attendance.count({
+        where: {
+          student_id: studentId,
+          status: 3 // 결석
+        },
+        include: [{
+          model: ClassSession,
+          where: { course_id: courseId },
+          attributes: []
+        }]
+      });
+
+      let notificationMessage = null;
+      if (absenceCount === 2) {
+        notificationMessage = `[${courseTitle}] 강의에 2회 결석하여 경고 알림이 발송되었습니다. 출결 관리에 유의해 주시기 바랍니다.`;
+      } else if (absenceCount === 3) {
+        notificationMessage = `[${courseTitle}] 강의에 3회 결석하여 위험 알림이 발송되었습니다. 학점 이수에 문제가 발생할 수 있으니 즉시 확인해 주시기 바랍니다.`;
+      }
+
+      if (notificationMessage) {
+        const newNotification = await Notification.create({
+          user_id: studentId,
+          type: 'ABSENCE_WARNING',
+          message: notificationMessage,
+          link: `/courses/${courseId}/score`
+        });
+        // SSE로 알림 발송
+        req.app.get('sendSseNotification')(studentId, newNotification);
+      }
+    }
+    // --- 로직 추가 끝 ---
 
     // 감사 로그 기록
     await AuditLog.create({
@@ -300,12 +401,14 @@ exports.upsertAttendance = async (req, res, next) => {
         }
 
         if (notificationMessage) {
-          await Notification.create({
+          const newNotification = await Notification.create({
             user_id: studentId,
             type: 'ABSENCE_WARNING',
             message: notificationMessage,
             link: `/courses/${courseId}/score`
           });
+          // SSE로 알림 발송
+          req.app.get('sendSseNotification')(studentId, newNotification);
         }
       }
     }
