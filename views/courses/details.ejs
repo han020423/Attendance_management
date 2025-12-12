@@ -37,10 +37,27 @@
     <ul>
       <% course.ClassSessions.forEach(session => { %>
         <li>
-          <%= session.week %>주차 (<%= session.date %> <%= session.start_at %>)
+          <%= session.week %>주차 (<%= new Date(session.date).toLocaleDateString() %> <%= session.start_at %>)
           - 상태: <%= getStatusText(session.status) %>
-          <% if (user.role === 'STUDENT' && session.status === 'CLOSED') { %>
-            <a href="/excuses/new/session/<%= session.id %>">공결 신청</a>
+          
+          <% if (user.role === 'STUDENT') { %>
+            <% const myAttendanceStatus = studentAttendanceMap.get(session.id); %>
+            <% if (myAttendanceStatus) { %>
+              <span class="my-attendance-status status-<%= myAttendanceStatus %>">
+                <strong> | 내 출결: <%= attendanceStatusTextMap[myAttendanceStatus] %></strong>
+              </span>
+            <% } %>
+          <% } %>
+
+          <% if (user.role === 'INSTRUCTOR') { %>
+            <% if (session.date <= todayString) { %>
+              | <a href="/sessions/<%= session.id %>/attendance/summary">출석부 보기/수정</a>
+            <% } %>
+            | <a href="/sessions/<%= session.id %>/edit">일정 수정</a>
+          <% } %>
+
+          <% if (user.role === 'STUDENT') { %>
+            | <a href="/excuses/new/session/<%= session.id %>">공결 신청</a>
           <% } %>
         </li>
       <% }) %>

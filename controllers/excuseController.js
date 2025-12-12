@@ -123,6 +123,7 @@ exports.updateExcuseStatus = async (req, res, next) => {
 
     const excuse = await ExcuseRequest.findByPk(id, { include: [ClassSession] });
     if (!excuse) {
+      await t.rollback();
       return res.status(404).send('신청을 찾을 수 없습니다.');
     }
 
@@ -131,11 +132,25 @@ exports.updateExcuseStatus = async (req, res, next) => {
     excuse.review_comment = review_comment;
     await excuse.save({ transaction: t });
 
+    // 승인된 경우, 출석 기록을 '공결'로 생성 또는 업데이트
     if (status === 'APPROVED') {
-      await Attendance.update(
-        { status: 4 }, // 4: 공결
-        { where: { session_id: excuse.session_id, student_id: excuse.student_id }, transaction: t }
-      );
+      const [attendance, created] = await Attendance.findOrCreate({
+        where: {
+          session_id: excuse.session_id,
+          student_id: excuse.student_id,
+        },
+        defaults: {
+          status: 4, // 4: 공결
+          method_used: 'EXCUSE',
+          checked_at: new Date(),
+        },
+        transaction: t
+      });
+
+      if (!created) {
+        attendance.status = 4; // 이미 레코드가 있으면 상태를 4로 업데이트
+        await attendance.save({ transaction: t });
+      }
     }
 
     await Notification.create({
@@ -146,7 +161,7 @@ exports.updateExcuseStatus = async (req, res, next) => {
     }, { transaction: t });
 
     await AuditLog.create({
-      actor_id: reviewer_id,
+      user_id: reviewer_id,
       action: `EXCUSE_REQUEST_${status}`,
       target_type: 'ExcuseRequest',
       target_id: id,

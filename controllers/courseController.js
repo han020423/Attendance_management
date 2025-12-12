@@ -65,22 +65,58 @@ exports.createCourse = async (req, res, next) => {
 
 // GET /courses/:id - 강의 상세 정보
 exports.getCourseDetails = async (req, res, next) => {
-  try {
-    const course = await Course.findByPk(req.params.id, {
-      include: [
-        { model: User, as: 'Instructor', attributes: ['name'] },
-        Semester,
-        { model: ClassSession, order: [['week', 'ASC']] }
-      ]
-    });
-    if (!course) {
-      return res.status(404).send('강의를 찾을 수 없습니다.');
+    try {
+        const course = await Course.findByPk(req.params.id, {
+            include: [
+                { model: User, as: 'Instructor' },
+                { model: CoursePolicy },
+                { model: ClassSession, order: [['week', 'ASC']] }
+            ]
+        });
+        if (!course) {
+            return res.status(404).send('강의를 찾을 수 없습니다.');
+        }
+
+        let studentAttendanceMap = new Map();
+        // 학생인 경우, 자신의 출석 정보를 가져와 Map으로 만듭니다.
+        if (req.session.user.role === 'STUDENT') {
+            const studentAttendances = await Attendance.findAll({
+                where: { student_id: req.session.user.id },
+                include: [{
+                    model: ClassSession,
+                    where: { course_id: course.id },
+                    attributes: ['id']
+                }]
+            });
+            studentAttendanceMap = new Map(studentAttendances.map(att => [att.ClassSession.id, att.status]));
+        }
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
+        const day = today.getDate().toString().padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+
+        // 출석 상태 코드를 텍스트로 변환하는 맵
+        const attendanceStatusTextMap = {
+            1: '출석',
+            2: '지각',
+            3: '결석',
+            4: '공결'
+        };
+
+        res.render('courses/details', {
+            title: course.title,
+            course,
+            todayString,
+            user: req.session.user,
+            studentAttendanceMap, // 학생의 출석 정보 Map
+            attendanceStatusTextMap // 상태 텍스트 변환 Map
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
     }
-    res.render('courses/details', { title: course.title, course });
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
 };
 
 // POST /courses/:id/sessions - 수업 일정 일괄 생성
@@ -158,9 +194,18 @@ exports.getAttendanceScore = async (req, res, next) => {
         const { id: course_id } = req.params;
         const student_id = req.session.user.id;
 
-        const policy = await CoursePolicy.findOne({ where: { course_id } });
+        // 1. Get policy (with defaults) and course info
+        let policy = await CoursePolicy.findOne({ where: { course_id } });
+        if (!policy) {
+            policy = {
+                lates_for_absence: 2,
+                absence_penalty_points: 1,
+                late_penalty_points: 0.5,
+            };
+        }
         const course = await Course.findByPk(course_id);
 
+        // 2. Get all attendances
         const attendances = await Attendance.findAll({
             where: { student_id },
             include: [{
@@ -170,6 +215,7 @@ exports.getAttendanceScore = async (req, res, next) => {
             }]
         });
 
+        // 3. Calculate RAW counts for display
         let lateCount = 0;
         let absentCount = 0;
         attendances.forEach(att => {
@@ -177,22 +223,23 @@ exports.getAttendanceScore = async (req, res, next) => {
             if (att.status === 3) absentCount++; // 결석
         });
 
-        // 지각 횟수를 결석 횟수로 변환
+        // 4. Calculate score based on policy
         const latesForAbsence = policy.lates_for_absence || 2;
-        absentCount += Math.floor(lateCount / latesForAbsence);
+        // Start with raw counts for calculation
+        let calculatedAbsentCount = absentCount + Math.floor(lateCount / latesForAbsence);
         const remainingLates = lateCount % latesForAbsence;
 
-        const totalPenalty = (absentCount * policy.absence_penalty_points) + (remainingLates * policy.late_penalty_points);
+        const totalPenalty = (calculatedAbsentCount * policy.absence_penalty_points) + (remainingLates * policy.late_penalty_points);
         
-        // 총점 계산 (예: 20점 만점)
         const maxScore = 20;
         const finalScore = Math.max(0, maxScore - totalPenalty);
 
+        // 5. Render view with both raw counts and score
         res.render('courses/score', {
-            title: '내 출석 점수',
+            title: '내 출석 점수', // Title back to "Score"
             course,
-            lateCount,
-            absentCount,
+            lateCount, // For the top display section
+            absentCount, // For the top display section
             totalPenalty,
             finalScore,
             maxScore,
