@@ -20,9 +20,9 @@
   
   <nav>
     <a href="/courses">내 강의 목록</a> |
-    <a href="/excuses?status=PENDING">공결 신청 관리</a> |
+    <a href="/excuses?status=PENDING">공결 신청 관리</a><% if (locals.pendingExcuseCount && pendingExcuseCount > 0) { %><span class="notification-count"><%= pendingExcuseCount %></span><% } %> |
     <a href="/reports/attendance">출석 리포트</a> |
-    <a href="/messages">메시지함</a>
+    <a href="/messages">메시지함</a><% if (locals.unreadMessageCount && unreadMessageCount > 0) { %><span class="notification-count"><%= unreadMessageCount %></span><% } %>
   </nav>
 
   <h2>오늘의 수업</h2>

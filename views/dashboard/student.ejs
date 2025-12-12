@@ -22,7 +22,7 @@
     <a href="/courses">내 수강과목</a> |
     <a href="/excuses/me">내 공결 신청</a> |
     <a href="/messages">메시지함</a> |
-    <a href="/me/notifications">내 알림</a>
+    <a href="/me/notifications">내 알림</a><% if (locals.unreadNotificationCount && unreadNotificationCount > 0) { %><span class="notification-count"><%= unreadNotificationCount %></span><% } %>
   </nav>
 
   <h2>오늘의 수업</h2>

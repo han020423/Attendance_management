@@ -52,5 +52,10 @@ router.get('/courses/:id/edit', renderCourseForm);
 router.post('/courses/:id', updateCourse);
 router.post('/courses/:id/delete', deleteCourse);
 
+// GET /admin -> redirect to dashboard
+router.get('/', (req, res) => {
+  res.redirect('/me/dashboard');
+});
+
 
 module.exports = router;

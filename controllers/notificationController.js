@@ -4,9 +4,15 @@ const { Notification } = require('../models');
 // GET /me/notifications - 내 알림 목록 조회
 exports.getNotifications = async (req, res, next) => {
   try {
+    // 사용자의 모든 읽지 않은 알림을 읽음으로 표시
+    await Notification.update(
+      { is_read: true },
+      { where: { user_id: req.session.user.id, is_read: false } }
+    );
+
     const notifications = await Notification.findAll({
       where: { user_id: req.session.user.id },
-      order: [['createdAt', 'DESC']],
+      order: [['created_at', 'DESC']],
       limit: 50,
     });
     res.render('notifications/list', { title: '내 알림', notifications });

@@ -1,12 +1,15 @@
 // controllers/dashboardController.js
 const { Op } = require('sequelize');
-const { Course, ClassSession, Enrollment, Attendance } = require('../models');
+const { Course, ClassSession, Enrollment, Attendance, Notification, ExcuseRequest, Message } = require('../models');
 
 // GET /me/dashboard
 exports.getDashboard = async (req, res, next) => {
   const { id, role } = req.session.user;
   const today = new Date();
-  const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const todayString = `${year}-${month}-${day}`;
 
   try {
     if (role === 'INSTRUCTOR') {
@@ -22,9 +25,30 @@ exports.getDashboard = async (req, res, next) => {
         order: [['start_at', 'ASC']],
       });
 
+      const pendingExcuseCount = await ExcuseRequest.count({
+        where: { status: 'PENDING' },
+        include: [{
+          model: ClassSession,
+          required: true,
+          attributes: [],
+          where: {
+            course_id: { [Op.in]: courseIds }
+          }
+        }]
+      });
+
+      const unreadMessageCount = await Message.count({
+        where: {
+          to_user_id: id,
+          is_read: false
+        }
+      });
+
       res.render('dashboard/instructor', {
         title: '교원 대시보드',
         todaySessions,
+        pendingExcuseCount,
+        unreadMessageCount,
       });
 
     } else if (role === 'STUDENT') {
@@ -58,9 +82,14 @@ exports.getDashboard = async (req, res, next) => {
         };
       });
 
+      const unreadNotificationCount = await Notification.count({
+        where: { user_id: id, is_read: false },
+      });
+
       res.render('dashboard/student', {
         title: '학생 대시보드',
         todaySessions: sessionsWithAttendance,
+        unreadNotificationCount,
       });
     } else { // ADMIN
       res.render('dashboard/admin', { title: '관리자 대시보드' });
