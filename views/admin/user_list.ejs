@@ -35,7 +35,12 @@
           <td><%= user.email %></td>
           <td><%= user.role %></td>
           <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
-          <td><a href="/admin/users/<%= user.id %>">수정</a></td>
+          <td>
+            <a href="/admin/users/<%= user.id %>">수정</a>
+            <form action="/admin/users/<%= user.id %>/delete" method="post" style="display: inline; margin-left: 10px;" onsubmit="return confirm('정말로 이 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+              <button type="submit" class="btn-delete">삭제</button>
+            </form>
+          </td>
         </tr>
       <% }) %>
     </tbody>

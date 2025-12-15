@@ -5,6 +5,7 @@ const {
   listUsers,
   getUserDetails,
   updateUser,
+  deleteUser,
   // Semester management
   listSemesters,
   createSemester,
@@ -56,6 +57,16 @@ router.post('/users/:id', /* #swagger.tags = ['Admin']
     #swagger.responses[403] = { description: '권한 없음' }
     #swagger.responses[404] = { description: '사용자를 찾을 수 없음' }
 */ updateUser);
+
+// POST /admin/users/:id/delete - 사용자 삭제
+router.post('/users/:id/delete', /* #swagger.tags = ['Admin']
+    #swagger.summary = '특정 사용자 삭제'
+    #swagger.description = '특정 사용자를 시스템에서 삭제합니다. 자기 자신은 삭제할 수 없습니다. (관리자 전용)'
+    #swagger.parameters['id'] = { in: 'path', description: '삭제할 사용자 ID', required: true, type: 'integer' }
+    #swagger.responses[200] = { description: '사용자 삭제 성공' }
+    #swagger.responses[403] = { description: '권한 없음 (자기 자신 삭제 시도 포함)' }
+    #swagger.responses[404] = { description: '사용자를 찾을 수 없음' }
+*/ deleteUser);
 
 //--- Semester Management ---//
 router.get('/semesters', /* #swagger.tags = ['Admin']

@@ -1,5 +1,5 @@
 // controllers/adminController.js
-const { User, Semester, Department, Course } = require('../models');
+const { User, Semester, Department, Course, AuditLog } = require('../models');
 
 // GET /admin/users - 사용자 목록
 exports.listUsers = async (req, res, next) => {
@@ -40,6 +40,38 @@ exports.updateUser = async (req, res, next) => {
       where: { id: req.params.id },
     });
     res.redirect(`/admin/users/${req.params.id}`);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+// POST /admin/users/:id/delete - 사용자 삭제
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const userIdToDelete = parseInt(req.params.id, 10);
+    const adminUserId = req.session.user.id;
+
+    // 관리자가 자기 자신을 삭제하는 것을 방지
+    if (userIdToDelete === adminUserId) {
+      return res.status(403).send('<script>alert("자기 자신은 삭제할 수 없습니다."); window.location.href="/admin/users";</script>');
+    }
+
+    const user = await User.findByPk(userIdToDelete);
+    if (user) {
+      await user.destroy();
+      
+      // 감사 로그 기록
+      await AuditLog.create({
+        actor_id: adminUserId,
+        action: 'USER_DELETE',
+        target_type: 'User',
+        target_id: userIdToDelete,
+        meta_json: { deleted_user_email: user.email }
+      });
+    }
+    
+    res.redirect('/admin/users');
   } catch (error) {
     console.error(error);
     next(error);

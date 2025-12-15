@@ -29,36 +29,40 @@
   <% if (todaySessions.length > 0) { %>
     <ul>
     <% todaySessions.forEach(session => { %>
-      <li>
-        <strong><%= session.Course.title %></strong>
-        (<%= session.start_at %> - <%= session.end_at %>) - <strong><%= getStatusText(session.status) %></strong>
+      <li class="session-item">
+        <div class="session-info">
+          <strong><%= session.Course.title %></strong>
+          (<%= session.start_at %> - <%= session.end_at %>) - <strong><%= getStatusText(session.status) %></strong>
+        </div>
         
-        <% if (session.status === 'OPEN') { %>
-          <% if (session.attendance && session.attendance.status === 1) { %>
-            <span>✅ 출석 완료</span>
-          <% } else if (session.attendance && session.attendance.status === 2) { %>
-            <span>⚠️ 지각</span>
-          <% } else { %>
-            <form action="/sessions/<%= session.id %>/attend" method="post" style="display: inline;">
-              <input type="text" name="pin" placeholder="인증번호" required>
-              <input type="hidden" name="method" value="PIN">
-              <button type="submit">출석하기</button>
-            </form>
-          <% } %>
-        <% } else if (session.status === 'CLOSED') { %>
+        <div class="session-action">
+          <% if (session.status === 'OPEN') { %>
             <% if (session.attendance && session.attendance.status === 1) { %>
-              <span>✅ 출석</span>
+              <span class="attendance-status-badge status-complete">✅ 출석 완료</span>
             <% } else if (session.attendance && session.attendance.status === 2) { %>
-              <span>⚠️ 지각</span>
-            <% } else if (session.attendance && session.attendance.status === 4) { %>
-              <span>👍 공결</span>
+              <span class="attendance-status-badge status-late">⚠️ 지각</span>
             <% } else { %>
-              <span>❌ 결석</span>
+              <form class="attend-form" action="/sessions/<%= session.id %>/attend" method="post">
+                <input type="text" name="pin" placeholder="인증번호" required>
+                <input type="hidden" name="method" value="PIN">
+                <button type="submit">출석하기</button>
+              </form>
             <% } %>
-            <a href="/excuses/new/session/<%= session.id %>">공결 신청</a>
-        <% } else { %>
-          <span>(<%= getStatusText(session.status) %>)</span>
-        <% } %>
+          <% } else if (session.status === 'CLOSED') { %>
+              <% if (session.attendance && session.attendance.status === 1) { %>
+                <span class="attendance-status-badge status-complete">✅ 출석</span>
+              <% } else if (session.attendance && session.attendance.status === 2) { %>
+                <span class="attendance-status-badge status-late">⚠️ 지각</span>
+              <% } else if (session.attendance && session.attendance.status === 4) { %>
+                <span class="attendance-status-badge status-excused">👍 공결</span>
+              <% } else { %>
+                <span class="attendance-status-badge status-absent">❌ 결석</span>
+              <% } %>
+              <a href="/excuses/new/session/<%= session.id %>" class="btn-link">공결 신청</a>
+          <% } else { %>
+            <span>(<%= getStatusText(session.status) %>)</span>
+          <% } %>
+        </div>
       </li>
     <% }) %>
     </ul>

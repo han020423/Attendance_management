@@ -28,5 +28,13 @@
     <button type="submit">정보 업데이트</button>
   </form>
 
+  <hr style="margin-top: 2rem; margin-bottom: 2rem;">
+
+  <h2>사용자 삭제</h2>
+  <form action="/admin/users/<%= userToEdit.id %>/delete" method="post" onsubmit="return confirm('정말로 이 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+    <p>이 사용자를 시스템에서 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.</p>
+    <button type="submit" class="btn-delete">사용자 삭제</button>
+  </form>
+
 </body>
 </html>

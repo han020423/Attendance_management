@@ -220,3 +220,74 @@ li {
   border-color: var(--medium-gray);
 }
 
+.btn-delete {
+  background-color: #dc3545; /* Red for danger */
+}
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+/* Student Dashboard Session Item */
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.session-info {
+  flex-grow: 1;
+}
+
+.session-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.attend-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0; /* Reset form padding */
+  box-shadow: none; /* Reset form shadow */
+  background: none; /* Reset form background */
+  margin: 0;
+}
+
+.attend-form input[type="text"] {
+  width: 100px; /* Adjust width as needed */
+  padding: 8px;
+}
+
+.attend-form button {
+  padding: 8px 12px;
+}
+
+.attendance-status-badge {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: var(--border-radius);
+  font-size: 0.9em;
+}
+
+.status-complete { background-color: #d4edda; color: #155724; }
+.status-late { background-color: #fff3cd; color: #856404; }
+.status-absent { background-color: #f8d7da; color: #721c24; }
+.status-excused { background-color: #d1ecf1; color: #0c5460; }
+
+.btn-link {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.9em;
+  padding: 4px 8px;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius);
+}
+.btn-link:hover {
+  background-color: var(--light-gray);
+  text-decoration: none;
+}
+
