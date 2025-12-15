@@ -1,0 +1,4558 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "My API",
+    "description": "Description",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "내 알림 목록 조회",
+        "description": "로그인한 사용자의 모든 알림을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "알림 목록 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "메시지 생성/전송",
+        "description": "새로운 메시지를 특정 사용자 또는 강의의 모든 수강생에게 전송합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "메시지 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "to_user_id": {
+                  "type": "string",
+                  "example": "(optional) 특정 사용자에게 보낼 경우 사용자 ID"
+                },
+                "course_id": {
+                  "type": "string",
+                  "example": "(optional) 특정 강의 수강생 전체에게 보낼 경우 강의 ID"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "메시지 제목"
+                },
+                "body": {
+                  "type": "string",
+                  "example": "메시지 내용"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "메시지 전송 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 수신자 정보 누락)"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그인 페이지 렌더링",
+        "description": "로그인 폼이 있는 HTML 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "responses": {
+          "200": {
+            "description": "로그인 페이지 렌더링 성공"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "사용자 로그인",
+        "description": "사용자의 이메일과 비밀번호를 받아 로그인 처리 후 세션에 사용자 정보를 저장합니다.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "로그인 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "로그인 성공. 대시보드로 리다이렉트됩니다."
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "인증 실패. 이메일 또는 비밀번호가 올바르지 않습니다."
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "사용자 로그아웃",
+        "description": "현재 로그인된 사용자의 세션을 파기하고 로그아웃 처리합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "로그아웃 성공"
+          },
+          "401": {
+            "description": "로그인되지 않은 사용자"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "회원가입 페이지 렌더링",
+        "description": "회원가입 폼이 있는 HTML 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "responses": {
+          "200": {
+            "description": "회원가입 페이지 렌더링 성공"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "신규 사용자 회원가입",
+        "description": "새로운 사용자를 시스템에 등록합니다.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "회원가입 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "홍길동"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "newuser@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "STUDENT"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "회원가입 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 필수 필드 누락)"
+          },
+          "409": {
+            "description": "이미 존재하는 이메일"
+          }
+        }
+      }
+    },
+    "/courses/": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "자신이 수강/강의하는 강의 목록 조회",
+        "description": "현재 로그인한 사용자가 수강하거나 강의하는 모든 강의 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "강의 목록 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/courses/{id}": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "특정 강의 상세 정보 조회",
+        "description": "특정 강의의 상세 정보를 조회합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "강의 상세 정보 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "403": {
+            "description": "강의 접근 권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "특정 강의 정보 업데이트",
+        "description": "특정 강의의 정보를 업데이트합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 강의 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "자료구조"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "CSE2021"
+                },
+                "section": {
+                  "type": "string",
+                  "example": "02"
+                },
+                "instructor_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "semester_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "department_id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "강의 정보 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/courses/{id}/sessions": {
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "수업 일정 일괄 생성",
+        "description": "특정 강의에 대한 전체 학기 수업 일정을 일괄 생성합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "수업 일정 생성 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string",
+                  "example": "2025-03-03"
+                },
+                "weeks": {
+                  "type": "number",
+                  "example": 15
+                },
+                "dayOfWeek": {
+                  "type": "number",
+                  "example": 1
+                },
+                "startTime": {
+                  "type": "string",
+                  "example": "10:30"
+                },
+                "endTime": {
+                  "type": "string",
+                  "example": "12:00"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "수업 일정 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/courses/{id}/policy": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "출석 정책 관리 페이지 렌더링",
+        "description": "강의의 출석 정책을 관리하는 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "출석 정책 업데이트",
+        "description": "강의의 출석 정책(지각, 결석 처리 기준 등)을 업데이트합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 정책 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "late_penalty_points": {
+                  "type": "number",
+                  "example": 0.5
+                },
+                "absence_penalty_points": {
+                  "type": "number",
+                  "example": 1
+                },
+                "lates_for_absence": {
+                  "type": "number",
+                  "example": 2
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "정책 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/courses/{id}/score": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "내 출석 점수 보기",
+        "description": "특정 강의에서의 나의 현재 출석 점수를 확인합니다. (학생 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/courses/{id}/enrollments": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "수강생 관리 페이지 렌더링",
+        "description": "강의에 등록된 수강생 목록을 관리하는 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "강의에 학생 추가",
+        "description": "이메일을 이용해 특정 학생을 강의에 수강생으로 추가합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "추가할 학생 이메일",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "student_email": {
+                  "type": "string",
+                  "example": "student@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학생 추가 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 이미 추가된 학생)"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "학생을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/courses/{courseId}/enrollments/{enrollmentId}/delete": {
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "강의에서 학생 삭제",
+        "description": "강의에서 특정 학생의 수강 등록을 취소합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "enrollmentId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "수강 등록 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학생 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수강 정보를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/sessions/{id}/edit": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "개별 수업(세션) 수정 폼 렌더링",
+        "description": "특정 수업 세션의 정보를 수정하는 폼 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "개별 수업(세션) 정보 업데이트",
+        "description": "특정 수업 세션의 정보를 업데이트합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 세션 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "example": "2025-03-03"
+                },
+                "start_at": {
+                  "type": "string",
+                  "example": "10:30"
+                },
+                "end_at": {
+                  "type": "string",
+                  "example": "12:00"
+                },
+                "room": {
+                  "type": "string",
+                  "example": "공학관 501호"
+                },
+                "is_holiday": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "세션 정보 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/sessions/{id}/open": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "출석 시작",
+        "description": "특정 수업 세션의 출석을 시작하고 PIN 코드를 생성합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 시작 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/sessions/{id}/close": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "출석 마감",
+        "description": "특정 수업 세션의 출석을 마감합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 마감 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/sessions/{id}/attend": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "학생 출석 처리",
+        "description": "학생이 출석 코드를 입력하여 출석을 시도합니다. (학생 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "출석 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "example": "PIN"
+                },
+                "pin": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 처리 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: PIN 불일치)"
+          },
+          "403": {
+            "description": "권한 없음 (예: 출석 시간이 아님)"
+          }
+        }
+      }
+    },
+    "/sessions/{id}/attendance/summary": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "출석 현황 요약 페이지 렌더링",
+        "description": "특정 수업 세션의 출석 현황 요약 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/student/{studentId}/attendance": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "특정 학생 출석 상태 수동 변경 (Upsert)",
+        "description": "강사가 특정 학생의 출석 상태를 수동으로 생성하거나 업데이트합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "학생 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 출석 상태",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/attendance/{attendanceId}/update": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "기존 출석 기록 수동 변경",
+        "description": "강사가 기존에 생성된 출석 기록의 상태를 수동으로 변경합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "attendanceId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "출석 기록 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 출석 상태",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 2
+                },
+                "reason": {
+                  "type": "string",
+                  "example": "사유 입력"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "출석 기록을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/excuses/": {
+      "get": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 목록 조회 (교수/관리자용)",
+        "description": "담당하고 있는 강의의 모든 공결 신청 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "조회할 상태 (PENDING, APPROVED, REJECTED)",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "공결 신청 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/excuses/me": {
+      "get": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "내 공결 신청 목록 조회 (학생용)",
+        "description": "자신이 신청한 모든 공결 신청 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "내 공결 신청 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/excuses/new/session/{sessionId}": {
+      "get": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 폼 렌더링",
+        "description": "특정 수업에 대한 공결 신청 폼 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "수업 세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/excuses/session/{sessionId}": {
+      "post": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 생성",
+        "description": "특정 수업에 대한 공결 신청을 제출합니다. 증빙 파일을 포함할 수 있습니다.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "수업 세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "formData",
+            "in": "formData",
+            "type": "object",
+            "properties": {
+              "reason_text": {
+                "type": "string",
+                "description": "사유 (텍스트)"
+              },
+              "reason_code": {
+                "type": "string",
+                "description": "사유 코드"
+              },
+              "excuseFile": {
+                "type": "file",
+                "description": "증빙 파일"
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reason_text": {
+                  "example": "any"
+                },
+                "reason_code": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "공결 신청 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/excuses/{id}": {
+      "get": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "특정 공결 신청 상세 조회",
+        "description": "특정 공결 신청의 상세 내역을 조회합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "공결 신청 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "상세 정보 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "403": {
+            "description": "접근 권한 없음"
+          },
+          "404": {
+            "description": "신청을 찾을 수 없음"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 상태 변경 (승인/반려)",
+        "description": "접수된 공결 신청을 승인하거나 반려합니다. (강사/관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "공결 신청 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 상태 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "APPROVED"
+                },
+                "review_comment": {
+                  "type": "string",
+                  "example": "확인 완료"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "신청을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/appeals/": {
+      "get": {
+        "tags": [
+          "Appeals"
+        ],
+        "summary": "이의 신청 목록 조회",
+        "description": "교수 또는 관리자가 접수된 이의 신청 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "이의 신청 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/appeals/{id}": {
+      "get": {
+        "tags": [
+          "Appeals"
+        ],
+        "summary": "특정 이의 신청 상세 보기",
+        "description": "교수 또는 관리자가 특정 이의 신청의 상세 내역을 조회합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "이의 신청 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "이의 신청 상세 정보 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "이의 신청을 찾을 수 없음"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Appeals"
+        ],
+        "summary": "이의 신청 상태 변경",
+        "description": "교수 또는 관리자가 이의 신청을 승인하거나 거절합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "이의 신청 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 상태 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "APPROVED"
+                },
+                "review_comment": {
+                  "type": "string",
+                  "example": "확인 완료"
+                },
+                "new_attendance_status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "이의 신청을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/appeals/attendance/{attendanceId}": {
+      "post": {
+        "tags": [
+          "Appeals"
+        ],
+        "summary": "출석에 대한 이의 신청 생성",
+        "description": "학생이 특정 출석 기록에 대해 이의를 신청합니다.",
+        "parameters": [
+          {
+            "name": "attendanceId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "출석 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "이의 신청 내용",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "출석이 잘못 처리되었습니다."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "이의 신청 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "출석 기록을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/reports/attendance": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "출석 통계 리포트 조회",
+        "description": "특정 강의 또는 주차의 출석 통계 리포트 페이지를 렌더링합니다. (강사/관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "course_id",
+            "in": "query",
+            "description": "강의 ID",
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "description": "주차",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "리포트 페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "파일 다운로드",
+        "description": "ID에 해당하는 파일을 다운로드합니다. (예: 공결 증빙 파일)",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "파일 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "파일 다운로드 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "403": {
+            "description": "파일 접근 권한 없음"
+          },
+          "404": {
+            "description": "파일을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/audits/": {
+      "get": {
+        "tags": [
+          "Audits"
+        ],
+        "summary": "감사 로그 조회",
+        "description": "시스템의 모든 감사 로그를 조회합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "페이지 번호",
+            "type": "integer"
+          },
+          {
+            "name": "target_type",
+            "in": "query",
+            "description": "대상 타입 (예: User, Course)",
+            "type": "string"
+          },
+          {
+            "name": "target_id",
+            "in": "query",
+            "description": "대상 ID",
+            "type": "integer"
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "description": "수행자 ID",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "감사 로그 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/me/dashboard/": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "역할별 대시보드 조회",
+        "description": "로그인한 사용자의 역할(학생/강사/관리자)에 맞는 대시보드 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "대시보드 렌더링 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/me/notifications/": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "내 알림 목록 조회",
+        "description": "로그인한 사용자의 모든 알림을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "알림 목록 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/me/notifications/{id}/read": {
+      "patch": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "특정 알림 읽음 처리",
+        "description": "특정 알림을 읽음 상태로 변경합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "알림 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "알림 읽음 처리 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "404": {
+            "description": "알림을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/votes/course/{courseId}": {
+      "get": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "특정 강의의 투표 목록 조회",
+        "description": "특정 강의에 생성된 모든 투표의 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "투표 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "새로운 투표 생성",
+        "description": "특정 강의에 새로운 투표를 생성합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 투표 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "중간고사 날짜 투표"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "선호하는 날짜를 선택해주세요."
+                },
+                "options": {
+                  "type": "array",
+                  "example": [
+                    "10월 20일",
+                    "10월 21일"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "closes_at": {
+                  "type": "string",
+                  "example": "2025-09-30T23:59:59"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "투표 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/votes/new/course/{courseId}": {
+      "get": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "투표 생성 폼 렌더링",
+        "description": "새로운 투표를 생성하는 폼 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/votes/{id}": {
+      "get": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "투표 상세 정보 조회 및 참여 페이지",
+        "description": "특정 투표의 상세 정보를 조회하고, 학생인 경우 투표에 참여할 수 있는 페이지를 렌더링합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "투표 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "투표 상세 정보 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "투표를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/votes/{id}/respond": {
+      "post": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "투표에 응답 제출",
+        "description": "학생이 특정 투표에 자신의 응답을 제출합니다. (학생 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "투표 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "선택한 옵션 ID",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "option_id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "투표 제출 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 이미 투표함)"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/messages/": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "받은 메시지 목록 조회",
+        "description": "현재 로그인한 사용자가 받은 모든 메시지 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "메시지 목록 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "메시지 생성/전송",
+        "description": "새로운 메시지를 특정 사용자 또는 강의의 모든 수강생에게 전송합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "메시지 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "to_user_id": {
+                  "type": "string",
+                  "example": "(optional) 특정 사용자에게 보낼 경우 사용자 ID"
+                },
+                "course_id": {
+                  "type": "string",
+                  "example": "(optional) 특정 강의 수강생 전체에게 보낼 경우 강의 ID"
+                },
+                "title": {
+                  "type": "string",
+                  "example": "메시지 제목"
+                },
+                "body": {
+                  "type": "string",
+                  "example": "메시지 내용"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "메시지 전송 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 수신자 정보 누락)"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/messages/new": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "새 메시지 작성 폼 렌더링",
+        "description": "새로운 메시지를 작성하는 폼 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "courseId",
+            "in": "query",
+            "description": "강의 ID (선택 사항)",
+            "type": "integer"
+          },
+          {
+            "name": "toUserId",
+            "in": "query",
+            "description": "받는 사람 ID (선택 사항)",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/messages/{id}": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "메시지 상세 보기",
+        "description": "특정 메시지의 상세 내용을 조회합니다. 조회 시 읽음 처리됩니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "메시지 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "메시지 상세 정보 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "403": {
+            "description": "메시지 접근 권한 없음"
+          },
+          "404": {
+            "description": "메시지를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "모든 사용자 목록 조회",
+        "description": "시스템의 모든 사용자 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "사용자 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "특정 사용자 상세 정보 조회",
+        "description": "특정 사용자의 상세 정보를 조회합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "사용자 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "사용자 정보 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "사용자를 찾을 수 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "특정 사용자 정보 업데이트",
+        "description": "특정 사용자의 정보를 업데이트합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "사용자 ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 사용자 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "홍길동"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "STUDENT"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "사용자 정보 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "사용자를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/semesters": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학기 목록 조회",
+        "description": "모든 학기 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "학기 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 학기 생성",
+        "description": "새로운 학기를 생성합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 학기 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "2025년 1학기"
+                },
+                "start_date": {
+                  "type": "string",
+                  "example": "2025-03-01"
+                },
+                "end_date": {
+                  "type": "string",
+                  "example": "2025-06-30"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "학기 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/admin/semesters/{id}/delete": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학기 삭제",
+        "description": "특정 학기를 삭제합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "학기 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학기 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "학기를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/departments": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학과 목록 조회",
+        "description": "모든 학과 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "학과 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 학과 생성",
+        "description": "새로운 학과를 생성합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 학과 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "컴퓨터공학과"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "학과 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/admin/departments/{id}/delete": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학과 삭제",
+        "description": "특정 학과를 삭제합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "학과 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학과 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "학과를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/courses": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "강의 목록 조회",
+        "description": "모든 강의 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "강의 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 강의 생성",
+        "description": "새로운 강의를 생성합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 강의 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "자료구조"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "CSE2021"
+                },
+                "section": {
+                  "type": "string",
+                  "example": "02"
+                },
+                "instructor_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "semester_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "department_id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "강의 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/admin/courses/new": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 강의 생성 페이지 렌더링",
+        "description": "새로운 강의를 생성하는 폼 페이지를 렌더링합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/admin/courses/{id}/edit": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "강의 수정 페이지 렌더링",
+        "description": "특정 강의를 수정하는 폼 페이지를 렌더링합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/courses/{id}": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "특정 강의 정보 업데이트",
+        "description": "특정 강의의 정보를 업데이트합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 강의 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "자료구조"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "CSE2021"
+                },
+                "section": {
+                  "type": "string",
+                  "example": "02"
+                },
+                "instructor_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "semester_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "department_id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "강의 정보 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/courses/{id}/delete": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "강의 삭제",
+        "description": "특정 강의를 삭제합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "강의 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/admin/reports/course-metrics": {
+      "get": {
+        "tags": [
+          "Admin Reports"
+        ],
+        "summary": "전체 강의 통계 조회",
+        "description": "전체 강의에 대한 통계 정보를 조회합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "통계 페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/admin/reports/course-metrics/{courseId}": {
+      "get": {
+        "tags": [
+          "Admin Reports"
+        ],
+        "summary": "특정 강의 통계 조회",
+        "description": "특정 강의에 대한 통계 정보를 조회합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "통계 페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/sse/connect": {
+      "get": {
+        "tags": [
+          "SSE"
+        ],
+        "summary": "실시간 알림 SSE(Server-Sent Events) 연결",
+        "description": "서버로부터 실시간 알림을 받기 위한 SSE 연결을 수립합니다. 이 엔드포인트에 연결하면 서버에서 보내는 이벤트가 스트림으로 전송됩니다.",
+        "produces": [
+          "text/event-stream"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE 연결 성공. 이벤트 스트림이 시작됩니다."
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "모든 사용자 목록 조회",
+        "description": "시스템의 모든 사용자 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "사용자 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "특정 사용자 상세 정보 조회",
+        "description": "특정 사용자의 상세 정보를 조회합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "사용자 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "사용자 정보 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "사용자를 찾을 수 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "특정 사용자 정보 업데이트",
+        "description": "특정 사용자의 정보를 업데이트합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "사용자 ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 사용자 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "홍길동"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "STUDENT"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "사용자 정보 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "사용자를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/semesters": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학기 목록 조회",
+        "description": "모든 학기 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "학기 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 학기 생성",
+        "description": "새로운 학기를 생성합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 학기 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "2025년 1학기"
+                },
+                "start_date": {
+                  "type": "string",
+                  "example": "2025-03-01"
+                },
+                "end_date": {
+                  "type": "string",
+                  "example": "2025-06-30"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "학기 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/semesters/{id}/delete": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학기 삭제",
+        "description": "특정 학기를 삭제합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "학기 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학기 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "학기를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/departments": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학과 목록 조회",
+        "description": "모든 학과 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "학과 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 학과 생성",
+        "description": "새로운 학과를 생성합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 학과 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "컴퓨터공학과"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "학과 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/departments/{id}/delete": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "학과 삭제",
+        "description": "특정 학과를 삭제합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "학과 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학과 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "학과를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/courses": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "강의 목록 조회",
+        "description": "모든 강의 목록을 조회합니다. (관리자 전용)",
+        "responses": {
+          "200": {
+            "description": "강의 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 강의 생성",
+        "description": "새로운 강의를 생성합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 강의 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "자료구조"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "CSE2021"
+                },
+                "section": {
+                  "type": "string",
+                  "example": "02"
+                },
+                "instructor_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "semester_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "department_id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "강의 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/courses/new": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "새 강의 생성 페이지 렌더링",
+        "description": "새로운 강의를 생성하는 폼 페이지를 렌더링합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/courses/{id}/edit": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "강의 수정 페이지 렌더링",
+        "description": "특정 강의를 수정하는 폼 페이지를 렌더링합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/courses/{id}/delete": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "강의 삭제",
+        "description": "특정 강의를 삭제합니다. (관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "강의 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/course-metrics": {
+      "get": {
+        "tags": [
+          "Admin Reports"
+        ],
+        "summary": "전체 강의 통계 조회",
+        "description": "전체 강의에 대한 통계 정보를 조회합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "통계 페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/course-metrics/{courseId}": {
+      "get": {
+        "tags": [
+          "Admin Reports"
+        ],
+        "summary": "특정 강의 통계 조회",
+        "description": "특정 강의에 대한 통계 정보를 조회합니다. (관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "통계 페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "강의를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/{id}": {
+      "get": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "투표 상세 정보 조회 및 참여 페이지",
+        "description": "특정 투표의 상세 정보를 조회하고, 학생인 경우 투표에 참여할 수 있는 페이지를 렌더링합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "투표 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "투표 상세 정보 조회 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "투표를 찾을 수 없음"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 상태 변경 (승인/반려)",
+        "description": "접수된 공결 신청을 승인하거나 반려합니다. (강사/관리자 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "공결 신청 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 상태 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "APPROVED"
+                },
+                "review_comment": {
+                  "type": "string",
+                  "example": "확인 완료"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "신청을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/attendance/{attendanceId}": {
+      "post": {
+        "tags": [
+          "Appeals"
+        ],
+        "summary": "출석에 대한 이의 신청 생성",
+        "description": "학생이 특정 출석 기록에 대해 이의를 신청합니다.",
+        "parameters": [
+          {
+            "name": "attendanceId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "출석 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "이의 신청 내용",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "출석이 잘못 처리되었습니다."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "이의 신청 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "출석 기록을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/login": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그인 페이지 렌더링",
+        "description": "로그인 폼이 있는 HTML 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "responses": {
+          "200": {
+            "description": "로그인 페이지 렌더링 성공"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "사용자 로그인",
+        "description": "사용자의 이메일과 비밀번호를 받아 로그인 처리 후 세션에 사용자 정보를 저장합니다.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "로그인 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "로그인 성공. 대시보드로 리다이렉트됩니다."
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "인증 실패. 이메일 또는 비밀번호가 올바르지 않습니다."
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "사용자 로그아웃",
+        "description": "현재 로그인된 사용자의 세션을 파기하고 로그아웃 처리합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "로그아웃 성공"
+          },
+          "401": {
+            "description": "로그인되지 않은 사용자"
+          }
+        }
+      }
+    },
+    "/register": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "회원가입 페이지 렌더링",
+        "description": "회원가입 폼이 있는 HTML 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "responses": {
+          "200": {
+            "description": "회원가입 페이지 렌더링 성공"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "신규 사용자 회원가입",
+        "description": "새로운 사용자를 시스템에 등록합니다.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "회원가입 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "홍길동"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "newuser@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "STUDENT"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "회원가입 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 필수 필드 누락)"
+          },
+          "409": {
+            "description": "이미 존재하는 이메일"
+          }
+        }
+      }
+    },
+    "/{id}/sessions": {
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "수업 일정 일괄 생성",
+        "description": "특정 강의에 대한 전체 학기 수업 일정을 일괄 생성합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "수업 일정 생성 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "startDate": {
+                  "type": "string",
+                  "example": "2025-03-03"
+                },
+                "weeks": {
+                  "type": "number",
+                  "example": 15
+                },
+                "dayOfWeek": {
+                  "type": "number",
+                  "example": 1
+                },
+                "startTime": {
+                  "type": "string",
+                  "example": "10:30"
+                },
+                "endTime": {
+                  "type": "string",
+                  "example": "12:00"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "수업 일정 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/{id}/policy": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "출석 정책 관리 페이지 렌더링",
+        "description": "강의의 출석 정책을 관리하는 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "출석 정책 업데이트",
+        "description": "강의의 출석 정책(지각, 결석 처리 기준 등)을 업데이트합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 정책 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "late_penalty_points": {
+                  "type": "number",
+                  "example": 0.5
+                },
+                "absence_penalty_points": {
+                  "type": "number",
+                  "example": 1
+                },
+                "lates_for_absence": {
+                  "type": "number",
+                  "example": 2
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "정책 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/{id}/score": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "내 출석 점수 보기",
+        "description": "특정 강의에서의 나의 현재 출석 점수를 확인합니다. (학생 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/{id}/enrollments": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "수강생 관리 페이지 렌더링",
+        "description": "강의에 등록된 수강생 목록을 관리하는 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "강의에 학생 추가",
+        "description": "이메일을 이용해 특정 학생을 강의에 수강생으로 추가합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "추가할 학생 이메일",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "student_email": {
+                  "type": "string",
+                  "example": "student@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학생 추가 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 이미 추가된 학생)"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "학생을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/{courseId}/enrollments/{enrollmentId}/delete": {
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "강의에서 학생 삭제",
+        "description": "강의에서 특정 학생의 수강 등록을 취소합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "enrollmentId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "수강 등록 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "학생 삭제 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수강 정보를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "내 공결 신청 목록 조회 (학생용)",
+        "description": "자신이 신청한 모든 공결 신청 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "내 공결 신청 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/new/session/{sessionId}": {
+      "get": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 폼 렌더링",
+        "description": "특정 수업에 대한 공결 신청 폼 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "수업 세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/session/{sessionId}": {
+      "post": {
+        "tags": [
+          "Excuses"
+        ],
+        "summary": "공결 신청 생성",
+        "description": "특정 수업에 대한 공결 신청을 제출합니다. 증빙 파일을 포함할 수 있습니다.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "수업 세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "formData",
+            "in": "formData",
+            "type": "object",
+            "properties": {
+              "reason_text": {
+                "type": "string",
+                "description": "사유 (텍스트)"
+              },
+              "reason_code": {
+                "type": "string",
+                "description": "사유 코드"
+              },
+              "excuseFile": {
+                "type": "file",
+                "description": "증빙 파일"
+              }
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reason_text": {
+                  "example": "any"
+                },
+                "reason_code": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "공결 신청 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/new": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "새 메시지 작성 폼 렌더링",
+        "description": "새로운 메시지를 작성하는 폼 페이지를 렌더링합니다.",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "courseId",
+            "in": "query",
+            "description": "강의 ID (선택 사항)",
+            "type": "integer"
+          },
+          {
+            "name": "toUserId",
+            "in": "query",
+            "description": "받는 사람 ID (선택 사항)",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/{id}/read": {
+      "patch": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "특정 알림 읽음 처리",
+        "description": "특정 알림을 읽음 상태로 변경합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "알림 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "알림 읽음 처리 성공"
+          },
+          "401": {
+            "description": "로그인 필요"
+          },
+          "404": {
+            "description": "알림을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/attendance": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "출석 통계 리포트 조회",
+        "description": "특정 강의 또는 주차의 출석 통계 리포트 페이지를 렌더링합니다. (강사/관리자 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "course_id",
+            "in": "query",
+            "description": "강의 ID",
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "in": "query",
+            "description": "주차",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "리포트 페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/{id}/edit": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "개별 수업(세션) 수정 폼 렌더링",
+        "description": "특정 수업 세션의 정보를 수정하는 폼 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "개별 수업(세션) 정보 업데이트",
+        "description": "특정 수업 세션의 정보를 업데이트합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "업데이트할 세션 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "example": "2025-03-03"
+                },
+                "start_at": {
+                  "type": "string",
+                  "example": "10:30"
+                },
+                "end_at": {
+                  "type": "string",
+                  "example": "12:00"
+                },
+                "room": {
+                  "type": "string",
+                  "example": "공학관 501호"
+                },
+                "is_holiday": {
+                  "type": "boolean",
+                  "example": false
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "세션 정보 업데이트 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/{id}/open": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "출석 시작",
+        "description": "특정 수업 세션의 출석을 시작하고 PIN 코드를 생성합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 시작 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/{id}/close": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "출석 마감",
+        "description": "특정 수업 세션의 출석을 마감합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 마감 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/{id}/attend": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "학생 출석 처리",
+        "description": "학생이 출석 코드를 입력하여 출석을 시도합니다. (학생 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "출석 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "example": "PIN"
+                },
+                "pin": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 처리 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: PIN 불일치)"
+          },
+          "403": {
+            "description": "권한 없음 (예: 출석 시간이 아님)"
+          }
+        }
+      }
+    },
+    "/{id}/attendance/summary": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "출석 현황 요약 페이지 렌더링",
+        "description": "특정 수업 세션의 출석 현황 요약 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "세션을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/{sessionId}/student/{studentId}/attendance": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "특정 학생 출석 상태 수동 변경 (Upsert)",
+        "description": "강사가 특정 학생의 출석 상태를 수동으로 생성하거나 업데이트합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "학생 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 출석 상태",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/{sessionId}/attendance/{attendanceId}/update": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "기존 출석 기록 수동 변경",
+        "description": "강사가 기존에 생성된 출석 기록의 상태를 수동으로 변경합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "세션 ID"
+          },
+          {
+            "name": "attendanceId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "출석 기록 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "변경할 출석 상태",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "number",
+                  "example": 2
+                },
+                "reason": {
+                  "type": "string",
+                  "example": "사유 입력"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "출석 상태 변경 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "출석 기록을 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "/connect": {
+      "get": {
+        "tags": [
+          "SSE"
+        ],
+        "summary": "실시간 알림 SSE(Server-Sent Events) 연결",
+        "description": "서버로부터 실시간 알림을 받기 위한 SSE 연결을 수립합니다. 이 엔드포인트에 연결하면 서버에서 보내는 이벤트가 스트림으로 전송됩니다.",
+        "produces": [
+          "text/event-stream"
+        ],
+        "parameters": [
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE 연결 성공. 이벤트 스트림이 시작됩니다."
+          },
+          "401": {
+            "description": "로그인 필요"
+          }
+        }
+      }
+    },
+    "/course/{courseId}": {
+      "get": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "특정 강의의 투표 목록 조회",
+        "description": "특정 강의에 생성된 모든 투표의 목록을 조회합니다.",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "투표 목록 조회 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "새로운 투표 생성",
+        "description": "특정 강의에 새로운 투표를 생성합니다. (강사 전용)",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "생성할 투표 정보",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "중간고사 날짜 투표"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "선호하는 날짜를 선택해주세요."
+                },
+                "options": {
+                  "type": "array",
+                  "example": [
+                    "10월 20일",
+                    "10월 21일"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "closes_at": {
+                  "type": "string",
+                  "example": "2025-09-30T23:59:59"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "투표 생성 성공"
+          },
+          "400": {
+            "description": "잘못된 요청"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/new/course/{courseId}": {
+      "get": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "투표 생성 폼 렌더링",
+        "description": "새로운 투표를 생성하는 폼 페이지를 렌더링합니다. (강사 전용)",
+        "produces": [
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "강의 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "페이지 렌더링 성공"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    },
+    "/{id}/respond": {
+      "post": {
+        "tags": [
+          "Votes"
+        ],
+        "summary": "투표에 응답 제출",
+        "description": "학생이 특정 투표에 자신의 응답을 제출합니다. (학생 전용)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "투표 ID"
+          },
+          {
+            "name": "accept",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "선택한 옵션 ID",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "option_id": {
+                  "type": "number",
+                  "example": 1
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "투표 제출 성공"
+          },
+          "400": {
+            "description": "잘못된 요청 (예: 이미 투표함)"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        }
+      }
+    }
+  }
+}

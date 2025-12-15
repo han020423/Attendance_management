@@ -46,7 +46,7 @@ app.set('sendSseNotification', (userId, notification) => {
 
 
 // Sequelize 연결
-sequelize.sync({ alter: true }) // alter: true로 하면 모델 변경 시 DB에 반영
+sequelize.sync() // alter: true로 하면 모델 변경 시 DB에 반영
   .then(() => {
     console.log('데이터베이스 연결 성공');
   })
@@ -81,6 +81,11 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user;
   next();
 });
+
+// Swagger UI 연동
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger-output.json');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile, { explorer: true }));
 
 // 기본 경로
 app.get('/', (req, res) => {

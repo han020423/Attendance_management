@@ -71,19 +71,29 @@ exports.renderRegister = (req, res) => {
 exports.register = async (req, res, next) => {
   const { name, email, password, role } = req.body;
   try {
+    // 백엔드 보안: role이 'ADMIN'인 경우 가입 차단
+    if (role && role.toUpperCase() === 'ADMIN') {
+      return res.status(403).render('auth/register', {
+        title: '회원가입',
+        error: '관리자(ADMIN) 역할로는 가입할 수 없습니다.',
+      });
+    }
+
     const exUser = await User.findOne({ where: { email } });
     if (exUser) {
-      return res.status(400).render('auth/register', {
+      return res.status(409).render('auth/register', { // 409 Conflict
         title: '회원가입',
         error: '이미 가입된 이메일입니다.',
       });
     }
     const hash = await bcrypt.hash(password, 12);
+    // role이 없거나 'ADMIN'이 아니면 기본값 'STUDENT' 또는 해당 역할로 설정
+    const userRole = (role && role.toUpperCase() !== 'ADMIN') ? role : 'STUDENT';
     const user = await User.create({
       name,
       email,
       password_hash: hash,
-      role,
+      role: userRole,
     });
     // 감사 로그 기록
     await AuditLog.create({
