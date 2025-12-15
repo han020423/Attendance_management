@@ -52,7 +52,7 @@ exports.getAttendanceReport = async (req, res, next) => {
       absenteeism: await Attendance.findAll({
         attributes: [
           'student_id',
-          [sequelize.fn('COUNT', sequelize.col('attendance.id')), 'absent_count']
+          [sequelize.fn('COUNT', sequelize.col('Attendance.id')), 'absent_count']
         ],
         where: {
           session_id: { [Op.in]: sessionIds },
