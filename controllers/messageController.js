@@ -5,8 +5,12 @@ const { Op } = require('sequelize');
 // GET /messages - 전체 메시지 목록 (보낸 것 + 받은 것)
 exports.getMessageList = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15; // 한 페이지에 15개씩 표시
+    const offset = (page - 1) * limit;
     const userId = req.session.user.id;
-    const messages = await Message.findAll({
+
+    const { count, rows: messages } = await Message.findAndCountAll({
       where: {
         [Op.or]: [
           { to_user_id: userId },   // 내가 받은 메시지
@@ -18,8 +22,18 @@ exports.getMessageList = async (req, res, next) => {
         { model: User, as: 'ToUser', attributes: ['name'] }
       ],
       order: [['createdAt', 'DESC']],
+      limit,
+      offset,
     });
-    res.render('messages/list', { title: '메시지함', messages });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.render('messages/list', {
+      title: '메시지함',
+      messages,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     console.error(error);
     next(error);

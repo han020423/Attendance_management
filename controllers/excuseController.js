@@ -48,21 +48,36 @@ exports.createExcuse = async (req, res, next) => {
 // GET /excuses - 공결 신청 목록 조회
 exports.getExcuses = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const offset = (page - 1) * limit;
+
     const { status } = req.query; // 'PENDING', 'APPROVED', 'REJECTED'
     const where = {};
     if (status) {
       where.status = status;
     }
     // 교원은 자기 과목의 신청만 보도록 필터링 필요 (추가 구현)
-    const excuses = await ExcuseRequest.findAll({
+    const { count, rows: excuses } = await ExcuseRequest.findAndCountAll({
       where,
       include: [
         { model: User, as: 'Student', attributes: ['name'] },
         { model: ClassSession, include: [{ model: Course, attributes: ['title'] }] }
       ],
       order: [['createdAt', 'DESC']],
+      limit,
+      offset,
     });
-    res.render('excuses/list', { title: '공결 신청 관리', excuses });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.render('excuses/list', {
+      title: '공결 신청 관리',
+      excuses,
+      currentPage: page,
+      totalPages,
+      filters: req.query,
+    });
   } catch (error) {
     console.error(error);
     next(error);
@@ -72,8 +87,12 @@ exports.getExcuses = async (req, res, next) => {
 // GET /me/excuses - 내 공결 신청 목록 조회
 exports.getMyExcuses = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const offset = (page - 1) * limit;
     const student_id = req.session.user.id;
-    const excuses = await ExcuseRequest.findAll({
+
+    const { count, rows: excuses } = await ExcuseRequest.findAndCountAll({
       where: { student_id },
       include: [
         {
@@ -82,8 +101,18 @@ exports.getMyExcuses = async (req, res, next) => {
         }
       ],
       order: [['createdAt', 'DESC']],
+      limit,
+      offset,
     });
-    res.render('excuses/my_list', { title: '내 공결 신청 내역', excuses });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.render('excuses/my_list', {
+      title: '내 공결 신청 내역',
+      excuses,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     console.error(error);
     next(error);

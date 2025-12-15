@@ -39,5 +39,36 @@
       <% }) %>
     </tbody>
   </table>
+
+  <% if (totalPages > 1) { %>
+    <nav class="pagination-nav">
+      <ul class="pagination">
+        <%
+          const query = new URLSearchParams(filters);
+          query.delete('page');
+          const queryString = query.toString();
+        %>
+        
+        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+          <a class="page-link" href="?page=<%= currentPage - 1 %>&<%= queryString %>">이전</a>
+        </li>
+
+        <% 
+          const startPage = Math.max(1, currentPage - 2);
+          const endPage = Math.min(totalPages, currentPage + 2);
+        %>
+
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>&<%= queryString %>"><%= i %></a>
+          </li>
+        <% } %>
+
+        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+          <a class="page-link" href="?page=<%= currentPage + 1 %>&<%= queryString %>">다음</a>
+        </li>
+      </ul>
+    </nav>
+  <% } %>
 </body>
 </html>
