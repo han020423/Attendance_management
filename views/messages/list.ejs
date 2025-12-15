@@ -12,17 +12,27 @@
   <table>
     <thead>
       <tr>
-        <th>상태</th>
-        <th>보낸 사람</th>
+        <th>구분</th>
+        <th>상대방</th>
         <th>제목</th>
-        <th>받은 시간</th>
+        <th>시간</th>
       </tr>
     </thead>
     <tbody>
       <% messages.forEach(message => { %>
-        <tr style="<%= message.is_read ? '' : 'font-weight: bold;' %>">
-          <td><%= message.is_read ? '읽음' : '안읽음' %></td>
-          <td><%= message.FromUser ? message.FromUser.name : 'N/A' %></td>
+        <% const isSent = message.from_user_id === user.id; %>
+        <tr style="<%= !isSent && !message.is_read ? 'font-weight: bold;' : '' %>">
+          <td>
+            <% if (isSent) { %>
+              <span style="color: #007bff;">보냄</span>
+            <% } else { %>
+              <span style="color: #28a745;">받음</span>
+              <% if (!message.is_read) { %>
+                <span style="font-size: 0.8em; color: red;">(안읽음)</span>
+              <% } %>
+            <% } %>
+          </td>
+          <td><%= isSent ? (message.ToUser ? message.ToUser.name : 'N/A') : (message.FromUser ? message.FromUser.name : 'N/A') %></td>
           <td><a href="/messages/<%= message.id %>"><%= message.title %></a></td>
           <td><%= new Date(message.createdAt).toLocaleString() %></td>
         </tr>

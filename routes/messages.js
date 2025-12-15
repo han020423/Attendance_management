@@ -2,7 +2,7 @@
 const express = require('express');
 const { isLoggedIn, requireRole } = require('../middlewares/authMiddleware');
 const {
-  getReceivedMessages,
+  getMessageList,
   renderNewMessageForm,
   createMessage,
   getMessageDetails,
@@ -10,13 +10,8 @@ const {
 
 const router = express.Router();
 
-// GET /messages - 받은 메시지 목록
-router.get('/', isLoggedIn, /* #swagger.tags = ['Messages']
-    #swagger.summary = '받은 메시지 목록 조회'
-    #swagger.description = '현재 로그인한 사용자가 받은 모든 메시지 목록을 조회합니다.'
-    #swagger.responses[200] = { description: '메시지 목록 조회 성공' }
-    #swagger.responses[401] = { description: '로그인 필요' }
-*/ getReceivedMessages);
+// GET /messages - 전체 메시지 목록
+router.get('/', isLoggedIn, getMessageList);
 
 // GET /messages/new - 새 메시지 작성 폼
 router.get('/new', isLoggedIn, /* #swagger.tags = ['Messages']

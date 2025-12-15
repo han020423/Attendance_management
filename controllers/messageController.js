@@ -2,15 +2,24 @@
 const { Message, User, Course, Enrollment, Notification, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
-// GET /messages - 받은 메시지 목록
-exports.getReceivedMessages = async (req, res, next) => {
+// GET /messages - 전체 메시지 목록 (보낸 것 + 받은 것)
+exports.getMessageList = async (req, res, next) => {
   try {
+    const userId = req.session.user.id;
     const messages = await Message.findAll({
-      where: { to_user_id: req.session.user.id },
-      include: [{ model: User, as: 'FromUser', attributes: ['name'] }],
+      where: {
+        [Op.or]: [
+          { to_user_id: userId },   // 내가 받은 메시지
+          { from_user_id: userId }  // 내가 보낸 메시지
+        ]
+      },
+      include: [
+        { model: User, as: 'FromUser', attributes: ['name'] },
+        { model: User, as: 'ToUser', attributes: ['name'] }
+      ],
       order: [['createdAt', 'DESC']],
     });
-    res.render('messages/list', { title: '받은 메시지', messages });
+    res.render('messages/list', { title: '메시지함', messages });
   } catch (error) {
     console.error(error);
     next(error);
@@ -131,24 +140,31 @@ exports.createMessage = async (req, res, next) => {
 exports.getMessageDetails = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
+    const userId = req.session.user.id;
     const message = await Message.findOne({
       where: {
         id: req.params.id,
-        to_user_id: req.session.user.id, // 본인에게 온 메시지만 확인 가능
+        // 내가 받거나 또는 보낸 메시지인지 확인
+        [Op.or]: [
+          { to_user_id: userId },
+          { from_user_id: userId }
+        ]
       },
       include: [
         { model: User, as: 'FromUser', attributes: ['name', 'email'] },
+        { model: User, as: 'ToUser', attributes: ['name', 'email'] }, // 받는 사람 정보도 추가
         Course
       ],
       transaction: t,
     });
 
     if (!message) {
+      await t.rollback();
       return res.status(404).send('메시지를 찾을 수 없거나 권한이 없습니다.');
     }
 
-    // 메시지 읽음 처리
-    if (!message.is_read) {
+    // 내가 받은 메시지인 경우에만 읽음 처리
+    if (!message.is_read && message.to_user_id === userId) {
       message.is_read = true;
       await message.save({ transaction: t });
     }
