@@ -32,14 +32,15 @@ router.get('/new', isLoggedIn, /* #swagger.tags = ['Messages']
 // POST /messages - 메시지 생성/전송
 router.post('/', isLoggedIn, /* #swagger.tags = ['Messages']
     #swagger.summary = '메시지 생성/전송'
-    #swagger.description = '새로운 메시지를 특정 사용자 또는 강의의 모든 수강생에게 전송합니다.'
+    #swagger.description = '새로운 메시지를 특정 사용자(이메일 또는 ID) 또는 강의의 모든 수강생에게 전송합니다.'
     #swagger.parameters['body'] = {
         in: 'body',
-        description: '메시지 정보',
+        description: '메시지 정보. to_user_email, to_user_id, course_id 중 하나는 반드시 필요합니다.',
         required: true,
         schema: {
-            to_user_id: '(optional) 특정 사용자에게 보낼 경우 사용자 ID',
-            course_id: '(optional) 특정 강의 수강생 전체에게 보낼 경우 강의 ID',
+            $to_user_email: 'professor@example.com',
+            $to_user_id: 1,
+            $course_id: 1,
             title: '메시지 제목',
             body: '메시지 내용'
         }
@@ -47,6 +48,7 @@ router.post('/', isLoggedIn, /* #swagger.tags = ['Messages']
     #swagger.responses[201] = { description: '메시지 전송 성공' }
     #swagger.responses[400] = { description: '잘못된 요청 (예: 수신자 정보 누락)' }
     #swagger.responses[401] = { description: '로그인 필요' }
+    #swagger.responses[404] = { description: '수신자 이메일을 찾을 수 없음' }
 */ createMessage);
 
 // GET /messages/:id - 메시지 상세 보기

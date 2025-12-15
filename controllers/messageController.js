@@ -48,7 +48,7 @@ exports.renderNewMessageForm = async (req, res, next) => {
 exports.createMessage = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { to_user_id, course_id, title, body } = req.body;
+    const { to_user_id, to_user_email, course_id, title, body } = req.body;
     const from_user_id = req.session.user.id;
     const sendSse = req.app.get('sendSseNotification');
 
@@ -79,22 +79,43 @@ exports.createMessage = async (req, res, next) => {
       });
 
     } else { // Case 2: 1대1 메시지
+      let recipientId;
+
+      // 교수가 이메일로 1대1 메시지를 보내는 경우
+      if (req.session.user.role === 'INSTRUCTOR' && to_user_email) {
+        const recipient = await User.findOne({ where: { email: to_user_email } });
+        if (!recipient) {
+          await t.rollback();
+          // TODO: 사용자에게 에러를 보여주는 더 나은 방법 (예: flash 메시지)
+          return res.status(404).send('<script>alert("해당 이메일의 사용자를 찾을 수 없습니다."); window.history.back();</script>');
+        }
+        recipientId = recipient.id;
+      } else if (to_user_id) {
+        // 학생이 교수에게 보내거나, 다른 방식으로 ID가 넘어온 경우
+        recipientId = to_user_id;
+      }
+
+      if (!recipientId) {
+        await t.rollback();
+        return res.status(400).send('<script>alert("메시지를 보낼 대상을 지정해야 합니다."); window.history.back();</script>');
+      }
+
       await Message.create({
         from_user_id,
-        to_user_id,
+        to_user_id: recipientId,
         title,
         body,
       }, { transaction: t });
 
       const newNotification = await Notification.create({
-        user_id: to_user_id,
+        user_id: recipientId,
         type: 'NEW_MESSAGE',
         message: `${req.session.user.name}님으로부터 새로운 메시지가 도착했습니다.`,
         link: `/messages`
       }, { transaction: t });
 
       // SSE로 알림 발송
-      sendSse(to_user_id, newNotification);
+      sendSse(recipientId, newNotification);
     }
 
     await t.commit();
