@@ -6,7 +6,13 @@
 </head>
 <body>
   <h1><%= title %></h1>
-  <p><a href="/excuses">목록으로</a></p>
+  <p>
+    <% if (user.role === 'STUDENT') { %>
+      <a href="/excuses/me">내 신청 목록으로</a>
+    <% } else { %>
+      <a href="/excuses">전체 목록으로</a>
+    <% } %>
+  </p>
 
   <div>
     <p><strong>학생:</strong> <%= excuse.Student ? excuse.Student.name : 'N/A' %> (<%= excuse.Student ? excuse.Student.email : 'N/A' %>)</p>
