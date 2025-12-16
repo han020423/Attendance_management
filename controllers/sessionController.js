@@ -10,6 +10,11 @@ exports.openAttendance = async (req, res, next) => {
       return res.status(404).send('수업을 찾을 수 없습니다.');
     }
 
+    // 휴강 상태인지 확인
+    if (session.status === 'CANCELLED') {
+      return res.status(403).send('휴강 상태인 수업입니다. 출석을 시작할 수 없습니다. 수업 상태를 변경해주세요.');
+    }
+
     // PIN 생성 (필요 시)
     const pin = Math.random().toString().slice(2, 8);
     session.status = 'OPEN';
@@ -222,15 +227,15 @@ exports.getAttendanceSummary = async (req, res, next) => {
                 const attJson = attendance.toJSON();
                 return { ...attJson, User: student }; // .Student -> .User
             } else {
-                // 없으면 기본값(결석)으로 가상 객체를 만듭니다.
+                // 없으면 기본값(미정)으로 가상 객체를 만듭니다.
                 return {
                     id: null, // DB에 없는 레코드
                     session_id: sessionId,
                     student_id: student.id,
-                    status: 3, // 3: 결석
+                    status: 0, // 0: 미정
                     checked_at: null,
                     method_used: null,
-                    User: student // .Student -> .User
+                    User: student
                 };
             }
         });
@@ -466,20 +471,23 @@ exports.updateSession = async (req, res, next) => {
       date: session.date,
       start_at: session.start_at,
       end_at: session.end_at,
+      status: session.status,
     };
-    const { date, start_at, end_at } = req.body;
+    const { date, start_at, end_at, status } = req.body;
 
-    await session.update({ date, start_at, end_at });
+    // 휴강으로 변경 시 is_holiday 플래그도 업데이트
+    const isHoliday = status === 'CANCELLED';
+    await session.update({ date, start_at, end_at, status, is_holiday: isHoliday });
 
     // 감사 로그 기록
     await AuditLog.create({
       actor_id: req.session.user.id,
-      action: 'SESSION_TIME_UPDATE',
+      action: 'SESSION_UPDATE',
       target_type: 'ClassSession',
       target_id: session.id,
       meta_json: JSON.stringify({
         old_data: oldData,
-        new_data: { date, start_at, end_at }
+        new_data: { date, start_at, end_at, status }
       }),
     });
 

@@ -119,6 +119,9 @@ exports.getCourseDetails = async (req, res, next) => {
     }
 };
 
+const Holidays = require('date-holidays');
+const hd = new Holidays('KR');
+
 // POST /courses/:id/sessions - 수업 일정 일괄 생성
 exports.createSessions = async (req, res, next) => {
   try {
@@ -133,6 +136,8 @@ exports.createSessions = async (req, res, next) => {
     for (let i = 0; i < weeks; i++) {
       const sessionDate = new Date(current);
       sessionDate.setDate(sessionDate.getDate() + (i * 7));
+      
+      const isHoliday = hd.isHoliday(sessionDate);
 
       sessions.push({
         course_id: courseId,
@@ -140,6 +145,8 @@ exports.createSessions = async (req, res, next) => {
         date: sessionDate.toISOString().split('T')[0],
         start_at: startTime,
         end_at: endTime,
+        is_holiday: !!isHoliday, // boolean으로 변환
+        status: isHoliday ? 'CANCELLED' : 'SCHEDULED',
       });
     }
 
