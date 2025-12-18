@@ -57,7 +57,11 @@ exports.renderNewMessageForm = async (req, res, next) => {
       where: { user_id: req.session.user.id },
       include: [{ model: Course, include: [{ model: User, as: 'Instructor' }] }]
     });
-    const instructors = enrollments.map(e => e.Course.Instructor);
+    const instructors = enrollments
+      .map(e => e.Course) // 먼저 Course 객체를 추출
+      .filter(course => course != null) // null인 Course 객체(고아 데이터)를 제거
+      .map(course => course.Instructor) // 이후 Instructor를 추출
+      .filter(instructor => instructor != null); // Instructor가 없는 경우(담당교수 미지정) 제거
     
     res.render('messages/form', { title: '새 메시지 작성', instructors });
 
