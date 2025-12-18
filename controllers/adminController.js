@@ -1,5 +1,6 @@
 // controllers/adminController.js
 const { User, Semester, Department, Course, AuditLog } = require('../models');
+const bcrypt = require('bcrypt');
 
 // GET /admin/users - 사용자 목록
 exports.listUsers = async (req, res, next) => {
@@ -8,6 +9,34 @@ exports.listUsers = async (req, res, next) => {
       order: [['createdAt', 'DESC']],
     });
     res.render('admin/user_list', { title: '사용자 관리', users });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+// GET /admin/users/new - 사용자 등록 폼 렌더링
+exports.renderUserForm = (req, res) => {
+  res.render('admin/user_form', { title: '신규 사용자 등록' });
+};
+
+// POST /admin/users - 신규 사용자 생성
+exports.createUser = async (req, res, next) => {
+  const { name, email, password, role } = req.body;
+  try {
+    const exUser = await User.findOne({ where: { email } });
+    if (exUser) {
+      // 간단한 경고 후 이전 페이지로 리디렉션
+      return res.status(409).send('<script>alert("이미 가입된 이메일입니다."); window.history.back();</script>');
+    }
+    const hash = await bcrypt.hash(password, 12);
+    await User.create({
+      name,
+      email,
+      password_hash: hash,
+      role,
+    });
+    res.redirect('/admin/users');
   } catch (error) {
     console.error(error);
     next(error);

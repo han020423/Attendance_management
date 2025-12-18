@@ -3,6 +3,8 @@ const express = require('express');
 const { requireRole } = require('../middlewares/authMiddleware');
 const {
   listUsers,
+  renderUserForm,
+  createUser,
   getUserDetails,
   updateUser,
   deleteUser,
@@ -35,6 +37,26 @@ router.get('/users', /* #swagger.tags = ['Admin']
     #swagger.responses[200] = { description: '사용자 목록 조회 성공' }
     #swagger.responses[403] = { description: '권한 없음' }
 */ listUsers);
+
+// GET /admin/users/new - 사용자 등록 폼
+router.get('/users/new', /* #swagger.tags = ['Admin']
+    #swagger.summary = '신규 사용자 등록 페이지 렌더링'
+    #swagger.description = '신규 사용자를 등록하는 폼 페이지를 렌더링합니다. (관리자 전용)'
+    #swagger.produces = ['text/html']
+    #swagger.responses[200] = { description: '페이지 렌더링 성공' }
+    #swagger.responses[403] = { description: '권한 없음' }
+*/ renderUserForm);
+
+// POST /admin/users - 신규 사용자 생성
+router.post('/users', /* #swagger.tags = ['Admin']
+    #swagger.summary = '신규 사용자 생성'
+    #swagger.description = '신규 사용자를 시스템에 생성합니다. (관리자 전용)'
+    #swagger.parameters['body'] = { in: 'body', description: '생성할 사용자 정보', required: true, schema: { name: '새사용자', email: 'new@example.com', password: 'password123', role: 'STUDENT' } }
+    #swagger.responses[302] = { description: '사용자 생성 성공 후 목록으로 리디렉션' }
+    #swagger.responses[400] = { description: '잘못된 요청' }
+    #swagger.responses[403] = { description: '권한 없음' }
+    #swagger.responses[409] = { description: '이미 존재하는 이메일' }
+*/ createUser);
 
 // GET /admin/users/:id - 사용자 상세
 router.get('/users/:id', /* #swagger.tags = ['Admin']
