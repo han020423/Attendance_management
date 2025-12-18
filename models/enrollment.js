@@ -19,8 +19,8 @@ class Enrollment extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Enrollment.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id' });
-    db.Enrollment.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id' });
+    db.Enrollment.belongsTo(db.User, { foreignKey: 'user_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.Enrollment.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id', onDelete: 'CASCADE' });
   }
 }
 

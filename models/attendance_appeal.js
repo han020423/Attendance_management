@@ -21,9 +21,9 @@ class AttendanceAppeal extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.AttendanceAppeal.belongsTo(db.Attendance, { foreignKey: 'attendance_id', targetKey: 'id' });
-    db.AttendanceAppeal.belongsTo(db.User, { as: 'Student', foreignKey: 'student_id', targetKey: 'id' });
-    db.AttendanceAppeal.belongsTo(db.User, { as: 'Reviewer', foreignKey: 'reviewed_by', targetKey: 'id' });
+    db.AttendanceAppeal.belongsTo(db.Attendance, { foreignKey: 'attendance_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.AttendanceAppeal.belongsTo(db.User, { as: 'Student', foreignKey: 'student_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.AttendanceAppeal.belongsTo(db.User, { as: 'Reviewer', foreignKey: 'reviewed_by', targetKey: 'id', onDelete: 'SET NULL' });
   }
 }
 

@@ -22,9 +22,12 @@ class ExcuseRequest extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.ExcuseRequest.belongsTo(db.ClassSession, { foreignKey: 'session_id', targetKey: 'id' });
-    db.ExcuseRequest.belongsTo(db.User, { as: 'Student', foreignKey: 'student_id', targetKey: 'id' });
-    db.ExcuseRequest.belongsTo(db.User, { as: 'Reviewer', foreignKey: 'reviewed_by', targetKey: 'id' });
+    // 수업 세션이 삭제되면, 해당 공결 신청도 삭제됩니다.
+    db.ExcuseRequest.belongsTo(db.ClassSession, { foreignKey: 'session_id', targetKey: 'id', onDelete: 'CASCADE' });
+    // 학생이 삭제되면, 해당 학생의 공결 신청도 삭제됩니다.
+    db.ExcuseRequest.belongsTo(db.User, { as: 'Student', foreignKey: 'student_id', targetKey: 'id', onDelete: 'CASCADE' });
+    // 검토한 관리자/교수가 삭제되면, 공결 신청의 '검토자' 필드만 NULL로 설정됩니다.
+    db.ExcuseRequest.belongsTo(db.User, { as: 'Reviewer', foreignKey: 'reviewed_by', targetKey: 'id', onDelete: 'SET NULL' });
     db.ExcuseRequest.hasMany(db.ExcuseFile, { foreignKey: 'excuse_id', sourceKey: 'id' });
   }
 }

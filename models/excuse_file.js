@@ -21,7 +21,7 @@ class ExcuseFile extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.ExcuseFile.belongsTo(db.ExcuseRequest, { foreignKey: 'excuse_id', targetKey: 'id' });
+    db.ExcuseFile.belongsTo(db.ExcuseRequest, { foreignKey: 'excuse_id', targetKey: 'id', onDelete: 'CASCADE' });
   }
 }
 

@@ -21,9 +21,9 @@ class Message extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Message.belongsTo(db.User, { as: 'FromUser', foreignKey: 'from_user_id', targetKey: 'id' });
-    db.Message.belongsTo(db.User, { as: 'ToUser', foreignKey: 'to_user_id', targetKey: 'id' });
-    db.Message.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id' }); // course_id가 NULL이면 개인 메시지
+    db.Message.belongsTo(db.User, { as: 'FromUser', foreignKey: 'from_user_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.Message.belongsTo(db.User, { as: 'ToUser', foreignKey: 'to_user_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.Message.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id', onDelete: 'CASCADE' }); // course_id가 NULL이면 개인 메시지
   }
 }
 

@@ -36,7 +36,7 @@ class CoursePolicy extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.CoursePolicy.belongsTo(db.Course, { foreignKey: { name: 'course_id', unique: true }, targetKey: 'id' });
+    db.CoursePolicy.belongsTo(db.Course, { foreignKey: { name: 'course_id', unique: true }, targetKey: 'id', onDelete: 'CASCADE' });
   }
 }
 

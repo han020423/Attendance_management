@@ -22,8 +22,8 @@ class Vote extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Vote.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id' });
-    db.Vote.belongsTo(db.ClassSession, { as: 'TargetSession', foreignKey: 'target_session_id', targetKey: 'id' });
+    db.Vote.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.Vote.belongsTo(db.ClassSession, { as: 'TargetSession', foreignKey: 'target_session_id', targetKey: 'id', onDelete: 'CASCADE' });
     db.Vote.hasMany(db.VoteOption, { foreignKey: 'vote_id', sourceKey: 'id' });
     db.Vote.hasMany(db.VoteResponse, { foreignKey: 'vote_id', sourceKey: 'id' });
   }

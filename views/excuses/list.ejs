@@ -28,6 +28,7 @@
     </thead>
     <tbody>
       <% excuses.forEach(excuse => { %>
+        <% if (excuse.ClassSession && excuse.ClassSession.Course) { %>
         <tr>
           <td><%= excuse.ClassSession.Course.title %></td>
           <td><%= excuse.ClassSession.week %></td>
@@ -36,6 +37,7 @@
           <td><%= new Date(excuse.createdAt).toLocaleDateString() %></td>
           <td><a href="/excuses/<%= excuse.id %>">보기</a></td>
         </tr>
+        <% } %>
       <% }) %>
     </tbody>
   </table>

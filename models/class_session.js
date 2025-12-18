@@ -28,7 +28,8 @@ class ClassSession extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.ClassSession.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id' });
+    // 과목이 삭제되면, 해당 과목의 모든 수업 세션도 함께 삭제됩니다.
+    db.ClassSession.belongsTo(db.Course, { foreignKey: 'course_id', targetKey: 'id', onDelete: 'CASCADE' });
     db.ClassSession.hasMany(db.Attendance, { foreignKey: 'session_id', sourceKey: 'id' });
     db.ClassSession.hasMany(db.ExcuseRequest, { foreignKey: 'session_id', sourceKey: 'id' });
   }

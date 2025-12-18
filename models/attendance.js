@@ -21,9 +21,9 @@ class Attendance extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Attendance.belongsTo(db.ClassSession, { foreignKey: 'session_id', targetKey: 'id' });
-    db.Attendance.belongsTo(db.User, { as: 'Student', foreignKey: 'student_id', targetKey: 'id' });
-    db.Attendance.belongsTo(db.User, { as: 'Updater', foreignKey: 'updated_by', targetKey: 'id' });
+    db.Attendance.belongsTo(db.ClassSession, { foreignKey: 'session_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.Attendance.belongsTo(db.User, { as: 'Student', foreignKey: 'student_id', targetKey: 'id', onDelete: 'CASCADE' });
+    db.Attendance.belongsTo(db.User, { as: 'Updater', foreignKey: 'updated_by', targetKey: 'id', onDelete: 'SET NULL' });
     db.Attendance.hasOne(db.AttendanceAppeal, { foreignKey: 'attendance_id', sourceKey: 'id' });
   }
 }

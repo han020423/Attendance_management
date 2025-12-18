@@ -48,6 +48,7 @@ exports.createExcuse = async (req, res, next) => {
 // GET /excuses - 공결 신청 목록 조회
 exports.getExcuses = async (req, res, next) => {
   try {
+    const user = req.session.user;
     const page = parseInt(req.query.page) || 1;
     const limit = 15;
     const offset = (page - 1) * limit;
@@ -57,13 +58,26 @@ exports.getExcuses = async (req, res, next) => {
     if (status) {
       where.status = status;
     }
-    // 교원은 자기 과목의 신청만 보도록 필터링 필요 (추가 구현)
+
+    const include = [
+      { model: User, as: 'Student', attributes: ['name'] },
+      { 
+        model: ClassSession, 
+        include: [{ model: Course, attributes: ['title'] }] 
+      }
+    ];
+
+    // 사용자가 교수인 경우, 자신의 과목에 대한 신청만 필터링
+    if (user.role === 'INSTRUCTOR') {
+      include[1].include[0].where = { instructor_id: user.id };
+      // INNER JOIN으로 변경하여 조건에 맞는 데이터만 가져오도록 설정
+      include[1].required = true;
+      include[1].include[0].required = true;
+    }
+
     const { count, rows: excuses } = await ExcuseRequest.findAndCountAll({
       where,
-      include: [
-        { model: User, as: 'Student', attributes: ['name'] },
-        { model: ClassSession, include: [{ model: Course, attributes: ['title'] }] }
-      ],
+      include,
       order: [['createdAt', 'DESC']],
       limit,
       offset,

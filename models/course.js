@@ -21,9 +21,9 @@ class Course extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Course.belongsTo(db.User, { as: 'Instructor', foreignKey: 'instructor_id', targetKey: 'id' });
-    db.Course.belongsTo(db.Semester, { foreignKey: 'semester_id', targetKey: 'id' });
-    db.Course.belongsTo(db.Department, { foreignKey: 'department_id', targetKey: 'id' });
+    db.Course.belongsTo(db.User, { as: 'Instructor', foreignKey: 'instructor_id', targetKey: 'id', onDelete: 'SET NULL' });
+    db.Course.belongsTo(db.Semester, { foreignKey: 'semester_id', targetKey: 'id', onDelete: 'SET NULL' });
+    db.Course.belongsTo(db.Department, { foreignKey: 'department_id', targetKey: 'id', onDelete: 'SET NULL' });
     db.Course.hasMany(db.Enrollment, { foreignKey: 'course_id', sourceKey: 'id' });
     db.Course.hasMany(db.ClassSession, { foreignKey: 'course_id', sourceKey: 'id' });
     db.Course.hasMany(db.Message, { foreignKey: 'course_id', sourceKey: 'id' });
