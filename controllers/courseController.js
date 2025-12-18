@@ -20,7 +20,9 @@ exports.getMyCourses = async (req, res, next) => {
           include: [Semester, { model: User, as: 'Instructor', attributes: ['name'] }]
         }]
       });
-      courses = enrollments.map(e => e.Course);
+      courses = enrollments
+        .map(e => e.Course)
+        .filter(course => course != null); // course가 null이 아닌 경우만 필터링
     }
     res.render('courses/list', { title: '내 강의 목록', courses });
   } catch (error) {
